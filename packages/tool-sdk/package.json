@@ -1,0 +1,35 @@
+{
+  "name": "@dev-tools/tool-sdk",
+  "version": "1.0.0",
+  "description": "SDK for building Dev Tools Platform tools",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@dev-tools/theme": "workspace:*",
+    "@dev-tools/ui": "workspace:*",
+    "@dev-tools/utils": "workspace:*",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}

@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Tool workspace transition */
+.tool-workspace {
+  @apply transition-all duration-300 ease-out;
+}
+
+/* Search input focus animation */
+.search-input:focus {
+  @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Card hover effect */
+.tool-card {
+  @apply transition-all duration-200;
+}
+
+.tool-card:hover {
+  @apply shadow-lg;
+  transform: translateY(-2px);
+}

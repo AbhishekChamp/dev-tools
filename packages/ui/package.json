@@ -1,0 +1,37 @@
+{
+  "name": "@dev-tools/ui",
+  "version": "1.0.0",
+  "description": "Shared UI components for Dev Tools Platform",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@dev-tools/theme": "workspace:*",
+    "@dev-tools/utils": "workspace:*",
+    "framer-motion": "^10.16.16",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-hot-toast": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}

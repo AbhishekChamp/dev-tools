@@ -1,0 +1,67 @@
+[
+  {
+    "id": "json-formatter",
+    "name": "JSON Formatter",
+    "description": "Format, validate, and beautify JSON data with syntax highlighting",
+    "route": "/json",
+    "remote": "jsonFormatterApp",
+    "entry": "http://localhost:3001/assets/remoteEntry.js",
+    "icon": "FileJson",
+    "category": "formatter",
+    "tags": ["json", "format", "validate", "beautify", "parse"],
+    "version": "1.0.0",
+    "author": "Dev Tools Platform"
+  },
+  {
+    "id": "regex-tester",
+    "name": "Regex Tester",
+    "description": "Test and debug regular expressions with real-time match highlighting",
+    "route": "/regex",
+    "remote": "regexTesterApp",
+    "entry": "http://localhost:3002/assets/remoteEntry.js",
+    "icon": "Regex",
+    "category": "tester",
+    "tags": ["regex", "test", "pattern", "match", "debug"],
+    "version": "1.0.0",
+    "author": "Dev Tools Platform"
+  },
+  {
+    "id": "jwt-decoder",
+    "name": "JWT Decoder",
+    "description": "Decode and inspect JWT tokens, view header, payload, and signature",
+    "route": "/jwt",
+    "remote": "jwtDecoderApp",
+    "entry": "http://localhost:3003/assets/remoteEntry.js",
+    "icon": "KeyRound",
+    "category": "encoder",
+    "tags": ["jwt", "decode", "token", "auth", "base64"],
+    "version": "1.0.0",
+    "author": "Dev Tools Platform"
+  },
+  {
+    "id": "base64-tool",
+    "name": "Base64 Tool",
+    "description": "Encode text to Base64 and decode Base64 to text with URL-safe option",
+    "route": "/base64",
+    "remote": "base64ToolApp",
+    "entry": "http://localhost:3004/assets/remoteEntry.js",
+    "icon": "ArrowLeftRight",
+    "category": "encoder",
+    "tags": ["base64", "encode", "decode", "convert", "url-safe"],
+    "version": "1.0.0",
+    "author": "Dev Tools Platform"
+  },
+  {
+    "id": "password-generator",
+    "name": "Password Generator",
+    "description": "Generate secure random passwords with configurable options and strength indicator",
+    "route": "/password",
+    "remote": "passwordGeneratorApp",
+    "entry": "http://localhost:3005/assets/remoteEntry.js",
+    "icon": "Lock",
+    "category": "generator",
+    "tags": ["password", "generator", "security", "random", "entropy"],
+    "version": "1.0.0",
+    "author": "Dev Tools Platform"
+  }
+]
