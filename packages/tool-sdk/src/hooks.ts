@@ -1,5 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 
+// Re-export for convenience
+export { useState, useCallback, useEffect };
+
 export function useToolState<T>(
   key: string,
   initialValue: T
@@ -85,4 +88,20 @@ export function useDebouncedTool<T>(value: T, delay: number): T {
   }, [value, delay]);
 
   return debouncedValue;
+}
+
+// Tool configuration hook
+export function useToolConfig<T extends Record<string, unknown>>(config: T): T {
+  const [toolConfig] = useState<T>(config);
+  return toolConfig;
+}
+
+// Tool analytics hook (placeholder - can be connected to analytics service)
+export function useToolAnalytics() {
+  const trackEvent = useCallback((event: string, data?: Record<string, unknown>) => {
+    // Placeholder for analytics tracking
+    // console.log('[Analytics]', event, data);
+  }, []);
+
+  return { trackEvent };
 }

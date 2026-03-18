@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Settings2, Trash2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, Button, Switch } from '@dev-tools/ui';
+import { Settings2, Trash2, Palette, Database, Info } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '@dev-tools/ui';
 import { ThemeToggle } from '@dev-tools/ui';
-import { useFavorites, useSidebar } from '@/stores';
+import { useFavorites } from '@/stores';
+import { useTheme } from '@dev-tools/theme';
 
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
@@ -12,19 +13,22 @@ export const Route = createFileRoute('/settings')({
 
 function SettingsPage() {
   const { favorites, removeFavorite } = useFavorites();
-  const { isOpen, toggle } = useSidebar();
+  const { theme, resolvedTheme } = useTheme();
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-4xl space-y-8">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-8"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-            <Settings2 className="h-6 w-6 text-primary" />
+        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
+        
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
+            <Settings2 className="h-7 w-7" />
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
@@ -40,46 +44,59 @@ function SettingsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="space-y-6"
+        className="grid gap-6"
       >
         {/* Appearance */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Palette className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Appearance</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Customize the look and feel
+                </p>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6 pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Theme</p>
                 <p className="text-sm text-muted-foreground">
-                  Choose your preferred color theme
+                  Current: <Badge variant="outline" className="ml-1 capitalize">{theme}</Badge>
+                  {' '}
+                  (Resolved: <Badge variant="outline" className="capitalize">{resolvedTheme}</Badge>)
                 </p>
               </div>
               <ThemeToggle />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Sidebar</p>
-                <p className="text-sm text-muted-foreground">
-                  Keep sidebar expanded by default
-                </p>
-              </div>
-              <Switch checked={isOpen} onChange={toggle} />
             </div>
           </CardContent>
         </Card>
 
         {/* Data */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Data</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                <Database className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Data</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Manage your saved preferences
+                </p>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Favorites</p>
                 <p className="text-sm text-muted-foreground">
-                  {favorites.length} tool{favorites.length !== 1 ? 's' : ''} in favorites
+                  {favorites.length} tool{favorites.length !== 1 ? 's' : ''} saved to favorites
                 </p>
               </div>
               <Button
@@ -98,18 +115,58 @@ function SettingsPage() {
         </Card>
 
         {/* About */}
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b bg-muted/30 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
+                <Info className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">About</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Information about the platform
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-6">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm font-medium">Version</span>
+              <Badge variant="outline">1.0.0</Badge>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm font-medium">Built with</span>
+              <span className="text-sm text-muted-foreground">React + TypeScript + Vite</span>
+            </div>
+            <p className="text-sm text-muted-foreground pt-2 border-t">
+              A modern micro-frontend developer tools platform with a focus on 
+              performance, privacy, and user experience.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Keyboard Shortcuts */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
         <Card>
           <CardHeader>
-            <CardTitle>About</CardTitle>
+            <CardTitle className="text-lg">Keyboard Shortcuts</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              <strong>Dev Tools Platform</strong> - Version 1.0.0
-            </p>
-            <p className="text-sm text-muted-foreground">
-              A micro-frontend developer tools platform built with React,
-              TypeScript, and Vite.
-            </p>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <span className="text-sm">Open Search</span>
+                <kbd className="rounded bg-muted px-2 py-1 text-xs font-mono">⌘K / Ctrl+K</kbd>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <span className="text-sm">Toggle Theme</span>
+                <kbd className="rounded bg-muted px-2 py-1 text-xs font-mono">Auto</kbd>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </motion.div>

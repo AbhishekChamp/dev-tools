@@ -1,76 +1,146 @@
 import * as React from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Heart, ArrowLeft } from 'lucide-react';
-import { Button } from '@dev-tools/ui';
-import { ToolCard } from '@/components/ToolCard';
+import { Heart, Sparkles, ArrowRight } from 'lucide-react';
+import { Button, AppCard } from '@dev-tools/ui';
 import { useFavorites } from '@/stores';
-import { builtInTools } from '@/utils/tools';
+import { builtInTools, getIconComponent } from '@/utils/tools';
 
 export const Route = createFileRoute('/favorites')({
   component: FavoritesPage,
 });
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
 function FavoritesPage() {
   const { favorites } = useFavorites();
+  const navigate = useNavigate();
 
   const favoriteTools = builtInTools.filter((tool) =>
     favorites.includes(tool.id)
   );
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-7xl space-y-8">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.6 }}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-500/10 via-red-500/5 to-background border p-8 lg:p-12"
       >
-        <Link to="/">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Tools
-          </Button>
-        </Link>
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10">
-            <Heart className="h-6 w-6 text-red-500" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Favorites</h1>
-            <p className="text-muted-foreground">
-              Your favorite developer tools
-            </p>
-          </div>
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-500/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-red-500/5 blur-3xl" />
+        
+        <div className="relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-6 inline-flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-1.5 text-sm font-medium text-red-600 dark:text-red-400"
+          >
+            <Heart className="h-4 w-4" />
+            <span>{favoriteTools.length} Favorite{favoriteTools.length !== 1 ? 's' : ''}</span>
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-4xl font-bold tracking-tight lg:text-5xl"
+          >
+            Your Favorites
+          </motion.h1>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-4 max-w-2xl text-lg text-muted-foreground"
+          >
+            Quick access to your most-used developer tools
+          </motion.p>
         </div>
       </motion.div>
 
       {/* Favorites Grid */}
       {favoriteTools.length > 0 ? (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {favoriteTools.map((tool, index) => (
-            <ToolCard key={tool.id} tool={tool} index={index} />
-          ))}
+          {favoriteTools.map((tool, index) => {
+            const Icon = getIconComponent(tool.icon);
+            return (
+              <motion.div key={tool.id} variants={itemVariants}>
+                <AppCard
+                  title={tool.name}
+                  description={tool.description}
+                  icon={<Icon className="h-8 w-8" />}
+                  onClick={() => navigate({ to: tool.route })}
+                  delay={index * 0.1}
+                />
+              </motion.div>
+            );
+          })}
         </motion.div>
       ) : (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center"
+          className="flex flex-col items-center justify-center rounded-3xl border border-dashed p-16 text-center"
         >
-          <Heart className="h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">No favorites yet</h3>
-          <p className="text-muted-foreground max-w-sm">
-            Add tools to your favorites by clicking the heart icon on any tool
-            card.
+          <div className="rounded-full bg-muted p-6">
+            <Heart className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h3 className="mt-6 text-xl font-semibold">No favorites yet</h3>
+          <p className="mt-2 max-w-sm text-muted-foreground">
+            Add tools to your favorites by clicking the heart icon on any tool page
           </p>
           <Link to="/">
-            <Button className="mt-6">Browse Tools</Button>
+            <Button className="mt-8 gap-2" size="lg">
+              Browse All Tools
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </motion.div>
+      )}
+
+      {/* Quick Actions */}
+      {favoriteTools.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex justify-center"
+        >
+          <Link to="/">
+            <Button variant="outline" size="lg" className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              Discover More Tools
+            </Button>
           </Link>
         </motion.div>
       )}

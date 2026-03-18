@@ -1,593 +1,443 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Copy,
+  Lock,
   RefreshCw,
+  Copy,
   Check,
   History,
-  Shield,
-  Zap,
   Trash2,
-  Lock,
-  Unlock,
-  Hash,
-  Type,
+  Shield,
+  ShieldCheck,
+  ShieldAlert,
+  Settings2,
+  Eye,
+  EyeOff,
+  Zap,
+  Clock,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@dev-tools/ui/components/Card';
-import { Button } from '@dev-tools/ui/components/Button';
-import { Badge } from '@dev-tools/ui/components/Badge';
-import { Switch } from '@dev-tools/ui/components/Switch';
-import { Label } from '@dev-tools/ui/components/Label';
-import { ToolContainer } from '@dev-tools/ui/components/ToolContainer';
-import { useLocalStorage } from '@dev-tools/ui/hooks/useLocalStorage';
-import { cn } from '@dev-tools/ui/utils/cn';
+import {
+  ToolLayout,
+  ActionButton,
+  SectionCard,
+  StatCard,
+} from '@dev-tools/tool-sdk';
 
-// Character sets
+interface PasswordOptions {
+  length: number;
+  uppercase: boolean;
+  lowercase: boolean;
+  numbers: boolean;
+  symbols: boolean;
+  excludeAmbiguous: boolean;
+}
+
+interface PasswordHistory {
+  password: string;
+  timestamp: number;
+  strength: number;
+}
+
 const CHAR_SETS = {
   uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
   lowercase: 'abcdefghijklmnopqrstuvwxyz',
   numbers: '0123456789',
-  symbols: '!@#$%^&*',
+  symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?',
+  ambiguous: '0O1lI',
 };
 
-// Password history item type
-interface PasswordHistoryItem {
-  password: string;
-  timestamp: number;
-  strength: PasswordStrength;
+function calculateStrength(password: string): number {
+  let score = 0;
+  if (password.length >= 8) score += 1;
+  if (password.length >= 12) score += 1;
+  if (/[a-z]/.test(password)) score += 1;
+  if (/[A-Z]/.test(password)) score += 1;
+  if (/[0-9]/.test(password)) score += 1;
+  if (/[^a-zA-Z0-9]/.test(password)) score += 1;
+  return Math.min(score, 5);
 }
 
-type PasswordStrength = 'weak' | 'fair' | 'good' | 'strong';
-
-// Calculate password entropy
-function calculateEntropy(password: string, charSetSize: number): number {
-  if (!password || charSetSize === 0) return 0;
-  return Math.log2(Math.pow(charSetSize, password.length));
-}
-
-// Calculate crack time
-function calculateCrackTime(entropy: number): string {
-  // Assume 100 billion guesses per second (high-end GPU cluster)
-  const guessesPerSecond = 100_000_000_000;
-  const seconds = Math.pow(2, entropy) / guessesPerSecond;
-
-  if (seconds < 1) return 'Instant';
-  if (seconds < 60) return `${Math.round(seconds)} seconds`;
-  if (seconds < 3600) return `${Math.round(seconds / 60)} minutes`;
-  if (seconds < 86400) return `${Math.round(seconds / 3600)} hours`;
-  if (seconds < 31536000) return `${Math.round(seconds / 86400)} days`;
-  if (seconds < 3153600000) return `${Math.round(seconds / 31536000)} years`;
-  if (seconds < 315360000000) return `${Math.round(seconds / 3153600000)} centuries`;
-  return 'Millennia+';
-}
-
-// Determine password strength
-function getPasswordStrength(entropy: number): PasswordStrength {
-  if (entropy < 40) return 'weak';
-  if (entropy < 60) return 'fair';
-  if (entropy < 80) return 'good';
-  return 'strong';
-}
-
-// Get strength color
-function getStrengthColor(strength: PasswordStrength): string {
+function getStrengthLabel(strength: number): { label: string; color: string; icon: React.ReactNode } {
   switch (strength) {
-    case 'weak':
-      return 'bg-red-500';
-    case 'fair':
-      return 'bg-yellow-500';
-    case 'good':
-      return 'bg-blue-500';
-    case 'strong':
-      return 'bg-green-500';
+    case 0:
+    case 1:
+      return { label: 'Very Weak', color: 'text-red-500', icon: <ShieldAlert className="h-5 w-5" /> };
+    case 2:
+      return { label: 'Weak', color: 'text-orange-500', icon: <ShieldAlert className="h-5 w-5" /> };
+    case 3:
+      return { label: 'Fair', color: 'text-yellow-500', icon: <Shield className="h-5 w-5" /> };
+    case 4:
+      return { label: 'Strong', color: 'text-green-500', icon: <ShieldCheck className="h-5 w-5" /> };
+    case 5:
+      return { label: 'Very Strong', color: 'text-emerald-500', icon: <ShieldCheck className="h-5 w-5" /> };
+    default:
+      return { label: 'Unknown', color: 'text-gray-500', icon: <Shield className="h-5 w-5" /> };
   }
 }
 
-// Get strength text color
-function getStrengthTextColor(strength: PasswordStrength): string {
-  switch (strength) {
-    case 'weak':
-      return 'text-red-500';
-    case 'fair':
-      return 'text-yellow-500';
-    case 'good':
-      return 'text-blue-500';
-    case 'strong':
-      return 'text-green-500';
-  }
-}
-
-// Get strength label
-function getStrengthLabel(strength: PasswordStrength): string {
-  switch (strength) {
-    case 'weak':
-      return 'Weak';
-    case 'fair':
-      return 'Fair';
-    case 'good':
-      return 'Good';
-    case 'strong':
-      return 'Strong';
-  }
-}
-
-// Generate cryptographically secure random password
-function generatePassword(
-  length: number,
-  includeUppercase: boolean,
-  includeLowercase: boolean,
-  includeNumbers: boolean,
-  includeSymbols: boolean
-): string {
-  let charSet = '';
-  if (includeUppercase) charSet += CHAR_SETS.uppercase;
-  if (includeLowercase) charSet += CHAR_SETS.lowercase;
-  if (includeNumbers) charSet += CHAR_SETS.numbers;
-  if (includeSymbols) charSet += CHAR_SETS.symbols;
-
-  if (charSet === '') return '';
-
-  const array = new Uint32Array(length);
-  window.crypto.getRandomValues(array);
-
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    password += charSet[array[i] % charSet.length];
-  }
-
-  return password;
-}
-
-export default function Tool(): React.ReactElement {
-  // Password state
-  const [password, setPassword] = useState('');
-  const [length, setLength] = useLocalStorage('password-generator-length', 16);
-  const [includeUppercase, setIncludeUppercase] = useLocalStorage(
-    'password-generator-uppercase',
-    true
-  );
-  const [includeLowercase, setIncludeLowercase] = useLocalStorage(
-    'password-generator-lowercase',
-    true
-  );
-  const [includeNumbers, setIncludeNumbers] = useLocalStorage(
-    'password-generator-numbers',
-    true
-  );
-  const [includeSymbols, setIncludeSymbols] = useLocalStorage(
-    'password-generator-symbols',
-    true
-  );
-  const [history, setHistory] = useLocalStorage<PasswordHistoryItem[]>(
-    'password-generator-history',
-    []
-  );
+export default function PasswordGenerator() {
+  const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [history, setHistory] = useState<PasswordHistory[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  
+  const [options, setOptions] = useState<PasswordOptions>({
+    length: 16,
+    uppercase: true,
+    lowercase: true,
+    numbers: true,
+    symbols: true,
+    excludeAmbiguous: false,
+  });
 
-  // Calculate character set size
-  const charSetSize =
-    (includeUppercase ? CHAR_SETS.uppercase.length : 0) +
-    (includeLowercase ? CHAR_SETS.lowercase.length : 0) +
-    (includeNumbers ? CHAR_SETS.numbers.length : 0) +
-    (includeSymbols ? CHAR_SETS.symbols.length : 0);
+  const generatePassword = useCallback(() => {
+    let charset = '';
+    if (options.uppercase) charset += CHAR_SETS.uppercase;
+    if (options.lowercase) charset += CHAR_SETS.lowercase;
+    if (options.numbers) charset += CHAR_SETS.numbers;
+    if (options.symbols) charset += CHAR_SETS.symbols;
 
-  // Calculate entropy and strength
-  const entropy = calculateEntropy(password, charSetSize);
-  const strength = getPasswordStrength(entropy);
-  const crackTime = calculateCrackTime(entropy);
+    if (options.excludeAmbiguous) {
+      charset = charset.split('').filter(c => !CHAR_SETS.ambiguous.includes(c)).join('');
+    }
 
-  // Generate password
-  const handleGenerate = useCallback(() => {
-    // Ensure at least one character type is selected
-    if (
-      !includeUppercase &&
-      !includeLowercase &&
-      !includeNumbers &&
-      !includeSymbols
-    ) {
+    if (charset === '') {
+      setPassword('');
       return;
     }
 
-    const newPassword = generatePassword(
-      length,
-      includeUppercase,
-      includeLowercase,
-      includeNumbers,
-      includeSymbols
-    );
+    const array = new Uint32Array(options.length);
+    crypto.getRandomValues(array);
+    
+    let newPassword = '';
+    for (let i = 0; i < options.length; i++) {
+      newPassword += charset[array[i] % charset.length];
+    }
 
     setPassword(newPassword);
-
+    
     // Add to history
-    const newItem: PasswordHistoryItem = {
-      password: newPassword,
-      timestamp: Date.now(),
-      strength: getPasswordStrength(
-        calculateEntropy(
-          newPassword,
-          (includeUppercase ? CHAR_SETS.uppercase.length : 0) +
-            (includeLowercase ? CHAR_SETS.lowercase.length : 0) +
-            (includeNumbers ? CHAR_SETS.numbers.length : 0) +
-            (includeSymbols ? CHAR_SETS.symbols.length : 0)
-        )
-      ),
-    };
+    const strength = calculateStrength(newPassword);
+    setHistory(prev => [
+      { password: newPassword, timestamp: Date.now(), strength },
+      ...prev.slice(0, 9)
+    ]);
+  }, [options]);
 
-    setHistory((prev) => {
-      const newHistory = [newItem, ...prev].slice(0, 5);
-      return newHistory;
-    });
-  }, [
-    length,
-    includeUppercase,
-    includeLowercase,
-    includeNumbers,
-    includeSymbols,
-    setHistory,
-  ]);
-
-  // Generate password on initial load and when settings change
+  // Generate password on mount and when options change
   useEffect(() => {
-    handleGenerate();
-  }, [handleGenerate]);
+    generatePassword();
+  }, [generatePassword]);
 
-  // Copy password to clipboard
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     if (!password) return;
     try {
       await navigator.clipboard.writeText(password);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy password:', err);
+    } catch {
+      // Ignore copy errors
     }
-  };
+  }, [password]);
 
-  // Clear history
-  const handleClearHistory = () => {
+  const clearHistory = useCallback(() => {
     setHistory([]);
-  };
+  }, []);
 
-  // Use password from history
-  const handleUseFromHistory = (item: PasswordHistoryItem) => {
-    setPassword(item.password);
-  };
+  const strength = calculateStrength(password);
+  const strengthInfo = getStrengthLabel(strength);
+  const strengthPercent = (strength / 5) * 100;
 
-  // Copy from history
-  const handleCopyFromHistory = async (item: PasswordHistoryItem) => {
-    try {
-      await navigator.clipboard.writeText(item.password);
-    } catch (err) {
-      console.error('Failed to copy password:', err);
-    }
+  const toggleOption = (key: keyof PasswordOptions) => {
+    setOptions(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <ToolContainer>
+    <ToolLayout
+      title="Password Generator"
+      description="Generate secure, random passwords with customizable options"
+      icon={<Lock className="h-8 w-8" />}
+      color="text-red-500"
+      bgColor="bg-red-500/10"
+    >
       <div className="space-y-6">
         {/* Password Display */}
-        <Card className="border-2 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="relative rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
                 <motion.div
                   key={password}
-                  initial={{ opacity: 0, y: -10 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={cn(
-                    'flex-1 font-mono text-2xl sm:text-3xl md:text-4xl break-all p-4 rounded-lg bg-muted',
-                    'tracking-wider select-all'
-                  )}
+                  className="font-mono text-2xl sm:text-3xl break-all tracking-wider"
                 >
-                  {password || 'Generate a password...'}
+                  {showPassword ? password : '•'.repeat(password.length)}
                 </motion.div>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleCopy}
-                    disabled={!password}
-                    className="h-12 w-12"
-                  >
-                    <AnimatePresence mode="wait">
-                      {copied ? (
-                        <motion.div
-                          key="check"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                        >
-                          <Check className="h-5 w-5 text-green-500" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="copy"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                        >
-                          <Copy className="h-5 w-5" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="icon"
-                    onClick={handleGenerate}
-                    disabled={charSetSize === 0}
-                    className="h-12 w-12"
-                  >
-                    <RefreshCw className="h-5 w-5" />
-                  </Button>
-                </div>
               </div>
-
-              {/* Strength Indicator */}
-              {password && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="space-y-2"
+              <div className="flex items-center gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        Strength:
-                      </span>
-                      <span
-                        className={cn(
-                          'text-sm font-semibold',
-                          getStrengthTextColor(strength)
-                        )}
-                      >
-                        {getStrengthLabel(strength)}
-                      </span>
-                    </div>
-                    <Badge variant="secondary">{Math.round(entropy)} bits</Badge>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <motion.div
-                      className={cn('h-full rounded-full', getStrengthColor(strength))}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min((entropy / 100) * 100, 100)}%` }}
-                      transition={{ duration: 0.5, ease: 'easeOut' }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Zap className="h-3 w-3" />
-                    <span>Estimated crack time: {crackTime}</span>
-                  </div>
-                </motion.div>
-              )}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleCopy}
+                  className="rounded-lg bg-primary p-2 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+                >
+                  {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                </motion.button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Lock className="h-5 w-5" />
-                Password Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Length Slider */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="length" className="text-base">
-                    Password Length
-                  </Label>
-                  <Badge variant="outline" className="font-mono text-lg">
-                    {length}
-                  </Badge>
+            {/* Strength Bar */}
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={strengthInfo.color}>{strengthInfo.icon}</span>
+                  <span className={`text-sm font-medium ${strengthInfo.color}`}>
+                    {strengthInfo.label}
+                  </span>
                 </div>
-                <input
-                  id="length"
-                  type="range"
-                  min={8}
-                  max={128}
-                  value={length}
-                  onChange={(e) => setLength(Number(e.target.value))}
-                  className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-muted accent-primary"
+                <span className="text-xs text-muted-foreground">{password.length} characters</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${strengthPercent}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className={`h-full rounded-full ${
+                    strength <= 1 ? 'bg-red-500' :
+                    strength === 2 ? 'bg-orange-500' :
+                    strength === 3 ? 'bg-yellow-500' :
+                    strength === 4 ? 'bg-green-500' :
+                    'bg-emerald-500'
+                  }`}
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>8</span>
-                  <span>32</span>
-                  <span>64</span>
-                  <span>96</span>
-                  <span>128</span>
-                </div>
               </div>
+            </div>
+          </div>
+        </motion.div>
 
-              {/* Character Type Toggles */}
-              <div className="space-y-3">
-                <Label className="text-base">Character Types</Label>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Type className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Uppercase (A-Z)</span>
-                    </div>
-                    <Switch
-                      checked={includeUppercase}
-                      onCheckedChange={setIncludeUppercase}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Type className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Lowercase (a-z)</span>
-                    </div>
-                    <Switch
-                      checked={includeLowercase}
-                      onCheckedChange={setIncludeLowercase}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Hash className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Numbers (0-9)</span>
-                    </div>
-                    <Switch
-                      checked={includeNumbers}
-                      onCheckedChange={setIncludeNumbers}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Unlock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Symbols (!@#$%^&*)</span>
-                    </div>
-                    <Switch
-                      checked={includeSymbols}
-                      onCheckedChange={setIncludeSymbols}
-                    />
-                  </div>
-                </div>
+        {/* Generate Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex justify-center"
+        >
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={generatePassword}
+            className="flex items-center gap-2 rounded-xl bg-primary px-8 py-4 text-lg font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+          >
+            <RefreshCw className="h-5 w-5" />
+            Generate New Password
+          </motion.button>
+        </motion.div>
+
+        {/* Options */}
+        <SectionCard title="Options" icon={<Settings2 className="h-5 w-5" />} delay={0.2}>
+          <div className="space-y-6">
+            {/* Length Slider */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Password Length</label>
+                <span className="rounded-lg bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+                  {options.length}
+                </span>
               </div>
+              <input
+                type="range"
+                min="4"
+                max="64"
+                value={options.length}
+                onChange={(e) => setOptions(prev => ({ ...prev, length: parseInt(e.target.value) }))}
+                className="w-full h-2 rounded-lg bg-muted appearance-none cursor-pointer accent-primary"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>4</span>
+                <span>32</span>
+                <span>64</span>
+              </div>
+            </div>
 
-              {/* Warning if no character types selected */}
-              <AnimatePresence>
-                {charSetSize === 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive"
-                  >
-                    Please select at least one character type to generate a password.
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </CardContent>
-          </Card>
-
-          {/* History */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <History className="h-5 w-5" />
-                Password History
-              </CardTitle>
-              {history.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearHistory}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            {/* Character Options */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { key: 'uppercase', label: 'Uppercase (A-Z)', icon: 'A' },
+                { key: 'lowercase', label: 'Lowercase (a-z)', icon: 'a' },
+                { key: 'numbers', label: 'Numbers (0-9)', icon: '1' },
+                { key: 'symbols', label: 'Symbols (!@#$)', icon: '@' },
+              ].map(({ key, label, icon }) => (
+                <motion.button
+                  key={key}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => toggleOption(key as keyof PasswordOptions)}
+                  className={`flex items-center gap-3 rounded-xl border p-4 transition-all ${
+                    options[key as keyof PasswordOptions]
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted bg-card hover:bg-accent'
+                  }`}
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Clear
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent>
-              <AnimatePresence mode="popLayout">
-                {history.length === 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    <History className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No passwords generated yet</p>
-                    <p className="text-xs mt-1">Last 5 passwords will appear here</p>
-                  </motion.div>
-                ) : (
-                  <div className="space-y-2">
-                    {history.map((item, index) => (
-                      <motion.div
-                        key={`${item.timestamp}-${index}`}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
-                      >
-                        <div
-                          className={cn(
-                            'w-2 h-2 rounded-full flex-shrink-0',
-                            getStrengthColor(item.strength)
-                          )}
-                        />
-                        <code className="flex-1 font-mono text-sm truncate">
-                          {item.password}
-                        </code>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => handleCopyFromHistory(item)}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => handleUseFromHistory(item)}
-                          >
-                            <RefreshCw className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </motion.div>
-                    ))}
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg font-mono text-lg font-bold ${
+                    options[key as keyof PasswordOptions]
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {icon}
                   </div>
-                )}
-              </AnimatePresence>
-            </CardContent>
-          </Card>
+                  <div className="flex-1 text-left">
+                    <span className="font-medium">{label}</span>
+                  </div>
+                  <div className={`h-5 w-5 rounded border-2 flex items-center justify-center ${
+                    options[key as keyof PasswordOptions]
+                      ? 'border-primary bg-primary'
+                      : 'border-muted'
+                  }`}>
+                    {options[key as keyof PasswordOptions] && (
+                      <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                    )}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Exclude Ambiguous */}
+            <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-accent transition-colors">
+              <input
+                type="checkbox"
+                checked={options.excludeAmbiguous}
+                onChange={() => toggleOption('excludeAmbiguous')}
+                className="h-5 w-5 rounded border-primary text-primary focus:ring-primary"
+              />
+              <div className="flex-1">
+                <p className="font-medium">Exclude Ambiguous Characters</p>
+                <p className="text-sm text-muted-foreground">Avoid characters like 0, O, 1, l, I</p>
+              </div>
+            </label>
+          </div>
+        </SectionCard>
+
+        {/* Password Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatCard 
+            label="Entropy" 
+            value={`${Math.floor(options.length * Math.log2(
+              (options.uppercase ? 26 : 0) +
+              (options.lowercase ? 26 : 0) +
+              (options.numbers ? 10 : 0) +
+              (options.symbols ? 20 : 0)
+            ))} bits`}
+            icon={<Zap className="h-4 w-4" />}
+            delay={0}
+          />
+          <StatCard 
+            label="Charset" 
+            value={`${
+              (options.uppercase ? 26 : 0) +
+              (options.lowercase ? 26 : 0) +
+              (options.numbers ? 10 : 0) +
+              (options.symbols ? 20 : 0)
+            } chars`}
+            icon={<Hash className="h-4 w-4" />}
+            delay={0.1}
+          />
+          <StatCard 
+            label="Generated" 
+            value={history.length}
+            icon={<Clock className="h-4 w-4" />}
+            delay={0.2}
+          />
+          <StatCard 
+            label="Strength" 
+            value={strengthInfo.label}
+            icon={strengthInfo.icon}
+            delay={0.3}
+          />
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-3 justify-center">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setLength(12);
-              setIncludeUppercase(true);
-              setIncludeLowercase(true);
-              setIncludeNumbers(true);
-              setIncludeSymbols(false);
-            }}
-            className="gap-2"
+        {/* History */}
+        {history.length > 0 && (
+          <SectionCard 
+            title="Recent Passwords" 
+            icon={<History className="h-5 w-5" />}
+            delay={0.4}
           >
-            Simple (12 chars)
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setLength(16);
-              setIncludeUppercase(true);
-              setIncludeLowercase(true);
-              setIncludeNumbers(true);
-              setIncludeSymbols(true);
-            }}
-            className="gap-2"
-          >
-            Strong (16 chars)
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setLength(32);
-              setIncludeUppercase(true);
-              setIncludeLowercase(true);
-              setIncludeNumbers(true);
-              setIncludeSymbols(true);
-            }}
-            className="gap-2"
-          >
-            Maximum (32 chars)
-          </Button>
-        </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {history.map((item, index) => (
+                <motion.div
+                  key={item.timestamp}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="flex items-center gap-3 rounded-xl border bg-card p-3"
+                >
+                  <button
+                    onClick={() => setPassword(item.password)}
+                    className="flex-1 font-mono text-sm truncate text-left hover:text-primary transition-colors"
+                  >
+                    {item.password}
+                  </button>
+                  <span className={`text-xs ${getStrengthLabel(item.strength).color}`}>
+                    {getStrengthLabel(item.strength).label}
+                  </span>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(item.password);
+                    }}
+                    className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </motion.button>
+                </motion.div>
+              ))}
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={clearHistory}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground transition-colors hover:bg-muted"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear History
+            </motion.button>
+          </SectionCard>
+        )}
+
+        {/* Security Note */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="rounded-2xl border border-green-500/20 bg-green-500/10 p-6"
+        >
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="h-6 w-6 text-green-500 shrink-0" />
+            <div>
+              <h4 className="font-semibold text-green-700 dark:text-green-400">Privacy First</h4>
+              <p className="mt-1 text-sm text-green-600/80 dark:text-green-400/80">
+                Passwords are generated locally in your browser using cryptographically secure random number generation. 
+                No data is ever sent to any server.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
-    </ToolContainer>
+    </ToolLayout>
   );
 }

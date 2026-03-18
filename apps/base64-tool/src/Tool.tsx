@@ -1,387 +1,409 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowRightLeft,
+  ArrowLeftRight,
+  ArrowRight,
+  ArrowLeft,
   Copy,
-  Trash2,
-  AlertCircle,
   Check,
-  FileCode,
+  Trash2,
+  Upload,
+  Download,
   Type,
+  FileCode,
+  Hash,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import {
-  ToolContainer,
-  Button,
-  Textarea,
-  Switch,
-  CopyButton,
-  Card,
-  CardContent,
-} from '@dev-tools/ui';
-import { fadeInUp, easeInOut } from '@dev-tools/ui/animations';
+  ToolLayout,
+  ActionButton,
+  SectionCard,
+  StatCard,
+} from '@dev-tools/tool-sdk';
 
-// Base64 encoding/decoding utilities
-const toBase64 = (text: string, urlSafe: boolean): string => {
-  try {
-    const base64 = btoa(unescape(encodeURIComponent(text)));
-    if (urlSafe) {
-      return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-    }
-    return base64;
-  } catch {
-    return '';
-  }
-};
-
-const fromBase64 = (base64: string, urlSafe: boolean): string => {
-  try {
-    let normalized = base64;
-    if (urlSafe) {
-      normalized = base64.replace(/-/g, '+').replace(/_/g, '/');
-      // Add padding if needed
-      while (normalized.length % 4) {
-        normalized += '=';
-      }
-    }
-    return decodeURIComponent(escape(atob(normalized)));
-  } catch {
-    throw new Error('Invalid Base64 string');
-  }
-};
-
-const isValidBase64 = (str: string, urlSafe: boolean): boolean => {
-  try {
-    if (urlSafe) {
-      // URL-safe Base64 validation
-      return /^[A-Za-z0-9_-]*$/.test(str);
-    }
-    // Standard Base64 validation
-    return /^[A-Za-z0-9+/]*={0,2}$/.test(str) && str.length % 4 === 0;
-  } catch {
-    return false;
-  }
-};
-
-type Mode = 'encode' | 'decode';
+type EncodeMode = 'text' | 'file';
 
 export default function Base64Tool() {
-  const [mode, setMode] = useState<Mode>('encode');
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [urlSafe, setUrlSafe] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'encode' | 'decode'>('encode');
+  const [inputMode, setInputMode] = useState<EncodeMode>('text');
+  const [input, setInput] = useState<string>('');
+  const [output, setOutput] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [urlSafe, setUrlSafe] = useState(false);
 
-  // Process input whenever it changes or mode/urlSafe changes
-  React.useEffect(() => {
-    if (!input.trim()) {
-      setOutput('');
-      setError(null);
-      return;
+  const toBase64 = useCallback((str: string, urlSafe: boolean): string => {
+    try {
+      let base64 = btoa(str);
+      if (urlSafe) {
+        base64 = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+      return base64;
+    } catch {
+      throw new Error('Invalid input for Base64 encoding');
     }
-
-    if (mode === 'encode') {
-      try {
-        const result = toBase64(input, urlSafe);
-        setOutput(result);
-        setError(null);
-      } catch {
-        setOutput('');
-        setError('Failed to encode text');
-      }
-    } else {
-      // decode mode
-      if (!isValidBase64(input, urlSafe)) {
-        setOutput('');
-        setError('Invalid Base64 string');
-        return;
-      }
-      try {
-        const result = fromBase64(input, urlSafe);
-        setOutput(result);
-        setError(null);
-      } catch (err) {
-        setOutput('');
-        setError('Failed to decode Base64');
-      }
-    }
-  }, [input, mode, urlSafe]);
-
-  const handleModeToggle = useCallback(() => {
-    setMode((prev) => (prev === 'encode' ? 'decode' : 'encode'));
-    setInput(output);
-    setOutput(input);
-    setError(null);
-  }, [input, output]);
-
-  const handleClear = useCallback(() => {
-    setInput('');
-    setOutput('');
-    setError(null);
   }, []);
 
+  const fromBase64 = useCallback((str: string, urlSafe: boolean): string => {
+    try {
+      let base64 = str;
+      if (urlSafe) {
+        base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) {
+          base64 += '=';
+        }
+      }
+      return atob(base64);
+    } catch {
+      throw new Error('Invalid Base64 string');
+    }
+  }, []);
+
+  const handleConvert = useCallback(() => {
+    if (!input) return;
+    
+    try {
+      setError('');
+      if (mode === 'encode') {
+        const result = toBase64(input, urlSafe);
+        setOutput(result);
+      } else {
+        const result = fromBase64(input, urlSafe);
+        setOutput(result);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Conversion failed');
+      setOutput('');
+    }
+  }, [input, mode, urlSafe, toBase64, fromBase64]);
+
   const handleCopy = useCallback(async () => {
+    if (!output) return;
     try {
       await navigator.clipboard.writeText(output);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Copy failed
+      // Ignore copy errors
     }
   }, [output]);
 
-  const inputLabel = mode === 'encode' ? 'Text Input' : 'Base64 Input';
-  const outputLabel = mode === 'encode' ? 'Base64 Output' : 'Decoded Text';
-  const inputIcon = mode === 'encode' ? Type : FileCode;
-  const outputIcon = mode === 'encode' ? FileCode : Type;
+  const handleClear = useCallback(() => {
+    setInput('');
+    setOutput('');
+    setError('');
+  }, []);
 
-  const inputPlaceholder =
-    mode === 'encode'
-      ? 'Enter text to encode...'
-      : 'Enter Base64 to decode...';
+  const handleSwap = useCallback(() => {
+    setMode(mode === 'encode' ? 'decode' : 'encode');
+    setInput(output);
+    setOutput(input);
+    setError('');
+  }, [mode, input, output]);
 
-  const charCount = input.length;
-  const outputCharCount = output.length;
-  const byteSize = new Blob([input]).size;
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      if (mode === 'encode') {
+        const base64 = btoa(content);
+        setOutput(urlSafe 
+          ? base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+          : base64
+        );
+      }
+    };
+    reader.readAsBinaryString(file);
+  }, [mode, urlSafe]);
+
+  const handleDownload = useCallback(() => {
+    if (!output) return;
+    const blob = new Blob([output], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = mode === 'encode' ? 'encoded.txt' : 'decoded.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [output, mode]);
+
+  const inputStats = {
+    chars: input.length,
+    words: input.trim() ? input.trim().split(/\s+/).length : 0,
+    lines: input.split('\n').length,
+  };
+
+  const outputStats = {
+    chars: output.length,
+    bytes: new Blob([output]).size,
+  };
 
   return (
-    <ToolContainer
-      title="Base64 Encoder/Decoder"
-      description="Convert text to Base64 and vice versa with URL-safe option"
-      className="max-w-5xl mx-auto"
+    <ToolLayout
+      title="Base64 Tool"
+      description="Encode and decode Base64 strings with URL-safe option and file support"
+      icon={<ArrowLeftRight className="h-8 w-8" />}
+      color="text-orange-500"
+      bgColor="bg-orange-500/10"
     >
-      {/* Mode Toggle & Options */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6"
-      >
-        {/* Mode Switcher */}
-        <div className="flex items-center gap-3 bg-muted rounded-lg p-1">
-          <Button
-            variant={mode === 'encode' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setMode('encode')}
-            className="gap-2"
-          >
-            <Type className="h-4 w-4" />
-            Encode
-          </Button>
-          <Button
-            variant={mode === 'decode' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setMode('decode')}
-            className="gap-2"
-          >
-            <FileCode className="h-4 w-4" />
-            Decode
-          </Button>
-        </div>
+      <div className="space-y-6">
+        {/* Mode Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-center"
+        >
+          <div className="inline-flex items-center rounded-2xl border bg-card p-1.5 shadow-sm">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { setMode('encode'); handleClear(); }}
+              className={`flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-medium transition-all ${
+                mode === 'encode'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <ArrowRight className="h-4 w-4" />
+              Encode
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSwap}
+              className="mx-2 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted"
+              title="Swap direction"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { setMode('decode'); handleClear(); }}
+              className={`flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-medium transition-all ${
+                mode === 'decode'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Decode
+            </motion.button>
+          </div>
+        </motion.div>
 
         {/* Options */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleModeToggle}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowRightLeft className="h-4 w-4" />
-            Swap
-          </button>
-          <div className="flex items-center gap-2">
-            <Switch
-              id="url-safe"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex flex-wrap items-center justify-center gap-3"
+        >
+          <label className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2 cursor-pointer hover:bg-accent transition-colors">
+            <input
+              type="checkbox"
               checked={urlSafe}
               onChange={(e) => setUrlSafe(e.target.checked)}
+              className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
             />
-            <label
-              htmlFor="url-safe"
-              className="text-sm text-muted-foreground cursor-pointer"
-            >
-              URL-safe
-            </label>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Input/Output Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input Section */}
-        <motion.div
-          variants={fadeInUp}
-          initial="hidden"
-          animate="visible"
-          transition={easeInOut}
-        >
-          <Card className="h-full">
-            <CardContent className="p-4 space-y-4">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <inputIcon className="h-4 w-4 text-primary" />
-                  {inputLabel}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    {charCount} chars
-                    {mode === 'encode' && byteSize > 0 && ` (${byteSize} bytes)`}
-                  </span>
-                  {input && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleClear}
-                      className="h-8 w-8"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Textarea */}
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={inputPlaceholder}
-                className="min-h-[200px] font-mono text-sm resize-none"
-              />
-
-              {/* Error Message */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center gap-2 text-sm text-destructive"
-                  >
-                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                    {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </CardContent>
-          </Card>
+            <span className="text-sm font-medium">URL-Safe Base64</span>
+          </label>
         </motion.div>
 
-        {/* Output Section */}
-        <motion.div
-          variants={fadeInUp}
-          initial="hidden"
-          animate="visible"
-          transition={{ ...easeInOut, delay: 0.1 }}
-        >
-          <Card className="h-full">
-            <CardContent className="p-4 space-y-4">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <outputIcon className="h-4 w-4 text-primary" />
-                  {outputLabel}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    {outputCharCount} chars
-                  </span>
-                  {output && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleCopy}
-                      className="h-8 w-8"
-                      disabled={!output}
-                    >
-                      <AnimatePresence mode="wait">
-                        {copied ? (
-                          <motion.div
-                            key="check"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                          >
-                            <Check className="h-4 w-4 text-green-500" />
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="copy"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Output Display */}
-              <div className="relative min-h-[200px]">
-                {output ? (
-                  <motion.div
+        {/* Input/Output Grid */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Input Section */}
+          <SectionCard 
+            title={mode === 'encode' ? 'Text to Encode' : 'Base64 to Decode'} 
+            icon={<Type className="h-5 w-5" />}
+            delay={0.1}
+          >
+            <div className="space-y-4">
+              <div className="relative">
+                <textarea
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    setError('');
+                  }}
+                  placeholder={mode === 'encode' 
+                    ? 'Enter text to encode...' 
+                    : 'Enter Base64 to decode...'}
+                  rows={10}
+                  className="w-full rounded-xl border bg-background px-4 py-3 font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                {input && (
+                  <motion.button
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="min-h-[200px] p-3 rounded-md border border-input bg-muted/30 font-mono text-sm break-all whitespace-pre-wrap overflow-auto max-h-[300px]"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleClear}
+                    className="absolute right-3 top-3 rounded-lg bg-muted p-2 text-muted-foreground transition-colors hover:text-foreground"
                   >
-                    {mode === 'encode' ? (
-                      // Syntax highlighting for Base64
-                      <span>
-                        {output.split('').map((char, i) => {
-                          const isPadding = char === '=';
-                          const isUrlSafe = urlSafe && (char === '-' || char === '_');
-                          return (
-                            <span
-                              key={i}
-                              className={
-                                isPadding
-                                  ? 'text-muted-foreground'
-                                  : isUrlSafe
-                                  ? 'text-blue-500 dark:text-blue-400'
-                                  : 'text-foreground'
-                              }
-                            >
-                              {char}
-                            </span>
-                          );
-                        })}
-                      </span>
-                    ) : (
-                      <span className="text-foreground">{output}</span>
-                    )}
-                  </motion.div>
-                ) : (
-                  <div className="min-h-[200px] flex items-center justify-center text-muted-foreground text-sm border border-dashed border-input rounded-md">
-                    {mode === 'encode'
-                      ? 'Encoded result will appear here'
-                      : 'Decoded result will appear here'}
-                  </div>
+                    <Trash2 className="h-4 w-4" />
+                  </motion.button>
                 )}
               </div>
 
-              {/* Empty space to match error area */}
-              <div className="h-6" />
-            </CardContent>
-          </Card>
+              {/* Input Stats */}
+              {input && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="grid grid-cols-3 gap-2"
+                >
+                  <div className="rounded-lg bg-muted/50 p-2 text-center">
+                    <div className="text-lg font-semibold">{inputStats.chars}</div>
+                    <div className="text-xs text-muted-foreground">Characters</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/50 p-2 text-center">
+                    <div className="text-lg font-semibold">{inputStats.words}</div>
+                    <div className="text-xs text-muted-foreground">Words</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/50 p-2 text-center">
+                    <div className="text-lg font-semibold">{inputStats.lines}</div>
+                    <div className="text-xs text-muted-foreground">Lines</div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </SectionCard>
+
+          {/* Output Section */}
+          <SectionCard 
+            title={mode === 'encode' ? 'Base64 Output' : 'Decoded Text'} 
+            icon={<FileCode className="h-5 w-5" />}
+            delay={0.2}
+          >
+            <div className="space-y-4">
+              <div className="relative">
+                <textarea
+                  value={output}
+                  readOnly
+                  placeholder="Result will appear here..."
+                  rows={10}
+                  className="w-full rounded-xl border bg-muted/30 px-4 py-3 font-mono text-sm resize-y focus:outline-none"
+                />
+                {output && (
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleCopy}
+                    className="absolute right-3 top-3 rounded-lg bg-card p-2 text-muted-foreground shadow-sm transition-colors hover:text-foreground"
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Output Stats */}
+              {output && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="grid grid-cols-2 gap-2"
+                >
+                  <div className="rounded-lg bg-muted/50 p-2 text-center">
+                    <div className="text-lg font-semibold">{outputStats.chars}</div>
+                    <div className="text-xs text-muted-foreground">Characters</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/50 p-2 text-center">
+                    <div className="text-lg font-semibold">{outputStats.bytes}</div>
+                    <div className="text-xs text-muted-foreground">Bytes</div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* Error */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-600 dark:text-red-400"
+            >
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                <span className="font-medium">{error}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex flex-wrap justify-center gap-3"
+        >
+          <ActionButton
+            onClick={handleConvert}
+            variant="primary"
+            icon={mode === 'encode' ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+            disabled={!input}
+          >
+            {mode === 'encode' ? 'Encode to Base64' : 'Decode from Base64'}
+          </ActionButton>
+          
+          <ActionButton
+            onClick={handleCopy}
+            variant="secondary"
+            icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            disabled={!output}
+          >
+            {copied ? 'Copied!' : 'Copy Result'}
+          </ActionButton>
+          
+          <ActionButton
+            onClick={handleDownload}
+            variant="outline"
+            icon={<Download className="h-4 w-4" />}
+            disabled={!output}
+          >
+            Download
+          </ActionButton>
+        </motion.div>
+
+        {/* Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="rounded-2xl border bg-muted/30 p-6"
+        >
+          <h4 className="mb-3 font-semibold flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            About Base64
+          </h4>
+          <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+            <p>
+              <strong>Base64</strong> is a binary-to-text encoding scheme that represents binary data in ASCII string format.
+            </p>
+            <p>
+              <strong>URL-Safe Base64</strong> replaces + with - and / with _ and removes padding = for use in URLs.
+            </p>
+          </div>
         </motion.div>
       </div>
-
-      {/* Info Footer */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="mt-6 text-xs text-muted-foreground space-y-1"
-      >
-        <p>
-          <strong>Standard Base64:</strong> Uses A-Z, a-z, 0-9, +, / with = padding
-        </p>
-        <p>
-          <strong>URL-safe Base64:</strong> Uses A-Z, a-z, 0-9, -, _ without padding
-          (RFC 4648)
-        </p>
-      </motion.div>
-    </ToolContainer>
+    </ToolLayout>
   );
 }

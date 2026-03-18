@@ -1,36 +1,31 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Check,
-  Copy,
   FileJson,
-  Minimize2,
-  AlertCircle,
-  Trash2,
   AlignLeft,
+  Minimize2,
+  Trash2,
   Download,
   Upload,
+  Check,
+  AlertCircle,
   Wand2,
+  Code2,
+  Layers,
+  Type,
+  Hash,
+  Braces,
+  FileCode,
 } from 'lucide-react';
-
-// UI Components from @dev-tools/ui
-import { Button } from '@dev-tools/ui/components/Button';
-import { Textarea } from '@dev-tools/ui/components/Textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@dev-tools/ui/components/Card';
-import { Badge } from '@dev-tools/ui/components/Badge';
-import { Alert, AlertDescription } from '@dev-tools/ui/components/Alert';
-
-// Utilities from @dev-tools/utils
-import { isValidJSON, copyToClipboard } from '@dev-tools/utils';
-
-// Tool SDK hooks
-import { useToolConfig, useToolAnalytics } from '@dev-tools/tool-sdk';
-
-interface JSONError {
-  message: string;
-  line?: number;
-  column?: number;
-}
+import { 
+  ToolLayout, 
+  ActionButton, 
+  SectionCard, 
+  StatCard,
+  InputArea,
+  OutputArea 
+} from '@dev-tools/tool-sdk';
+import { isValidJSON } from '@dev-tools/utils';
 
 interface JSONStats {
   size: string;
@@ -44,35 +39,13 @@ interface JSONStats {
   nulls: number;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: [0.25, 0.1, 0.25, 1],
-    },
-  },
-};
-
 // Syntax highlighter component for JSON
 const SyntaxHighlightedJSON: React.FC<{ json: string }> = ({ json }) => {
+  if (!json) return null;
+  
   const highlightJSON = (jsonStr: string): React.ReactNode[] => {
     const tokens: React.ReactNode[] = [];
     let key = 0;
-
-    // Simple syntax highlighting using regex
     const lines = jsonStr.split('\n');
 
     lines.forEach((line, lineIndex) => {
@@ -204,46 +177,36 @@ const calculateStats = (obj: unknown): Omit<JSONStats, 'size' | 'lines'> => {
   return { keys, arrays, objects, strings, numbers, booleans, nulls };
 };
 
-// Format bytes to human readable
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ['B', 'KB', 'MB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const Tool: React.FC = () => {
+export default function JSONFormatter() {
   const [input, setInput] = useState<string>('');
   const [output, setOutput] = useState<string>('');
-  const [error, setError] = useState<JSONError | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string>('');
   const [stats, setStats] = useState<JSONStats | null>(null);
-  const [history, setHistory] = useState<string[]>([]);
-
-  const { config } = useToolConfig();
-  const { trackEvent } = useToolAnalytics();
 
   // Load sample JSON on mount
   useEffect(() => {
-    const sampleJSON = JSON.stringify(
-      {
-        name: 'John Doe',
-        age: 30,
-        email: 'john.doe@example.com',
-        address: {
-          street: '123 Main St',
-          city: 'New York',
-          zipCode: '10001',
-        },
-        hobbies: ['reading', 'gaming', 'coding'],
-        isActive: true,
-        balance: 1234.56,
-        metadata: null,
+    const sampleJSON = JSON.stringify({
+      name: 'John Doe',
+      age: 30,
+      email: 'john.doe@example.com',
+      address: {
+        street: '123 Main St',
+        city: 'New York',
+        zipCode: '10001',
       },
-      null,
-      2
-    );
+      hobbies: ['reading', 'gaming', 'coding'],
+      isActive: true,
+      balance: 1234.56,
+      metadata: null,
+    }, null, 2);
     setInput(sampleJSON);
     setOutput(sampleJSON);
     updateStats(sampleJSON);
@@ -266,38 +229,31 @@ const Tool: React.FC = () => {
     }
   }, []);
 
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setInput(value);
-      setError(null);
+  const handleInputChange = useCallback((value: string) => {
+    setInput(value);
+    setError('');
 
-      // Auto-format if valid JSON
-      if (isValidJSON(value)) {
-        setOutput(value);
-        updateStats(value);
-      } else {
-        setOutput('');
-        setStats(null);
-      }
-    },
-    [updateStats]
-  );
+    if (isValidJSON(value)) {
+      setOutput(value);
+      updateStats(value);
+    } else {
+      setOutput('');
+      setStats(null);
+    }
+  }, [updateStats]);
 
   const formatJSON = useCallback(() => {
     try {
       const parsed = JSON.parse(input);
       const formatted = JSON.stringify(parsed, null, 2);
       setOutput(formatted);
-      setError(null);
+      setError('');
       updateStats(formatted);
-      addToHistory(formatted);
-      trackEvent('json_format', { action: 'format' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Invalid JSON';
-      setError({ message });
-      trackEvent('json_error', { action: 'format', error: message });
+      setError(message);
     }
-  }, [input, trackEvent, updateStats]);
+  }, [input, updateStats]);
 
   const minifyJSON = useCallback(() => {
     try {
@@ -305,48 +261,20 @@ const Tool: React.FC = () => {
       const minified = JSON.stringify(parsed);
       setOutput(minified);
       setInput(minified);
-      setError(null);
+      setError('');
       updateStats(minified);
-      addToHistory(minified);
-      trackEvent('json_format', { action: 'minify' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Invalid JSON';
-      setError({ message });
-      trackEvent('json_error', { action: 'minify', error: message });
+      setError(message);
     }
-  }, [input, trackEvent, updateStats]);
-
-  const validateJSON = useCallback(() => {
-    try {
-      JSON.parse(input);
-      setError(null);
-      trackEvent('json_validate', { valid: true });
-      return true;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Invalid JSON';
-      setError({ message });
-      trackEvent('json_validate', { valid: false, error: message });
-      return false;
-    }
-  }, [input, trackEvent]);
-
-  const handleCopy = useCallback(async () => {
-    if (!output) return;
-    const success = await copyToClipboard(output);
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      trackEvent('json_copy', { success: true });
-    }
-  }, [output, trackEvent]);
+  }, [input, updateStats]);
 
   const handleClear = useCallback(() => {
     setInput('');
     setOutput('');
-    setError(null);
+    setError('');
     setStats(null);
-    trackEvent('json_clear');
-  }, [trackEvent]);
+  }, []);
 
   const handleDownload = useCallback(() => {
     if (!output) return;
@@ -359,60 +287,36 @@ const Tool: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    trackEvent('json_download');
-  }, [output, trackEvent]);
+  }, [output]);
 
-  const handleFileUpload = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setInput(content);
-        if (isValidJSON(content)) {
-          const parsed = JSON.parse(content);
-          const formatted = JSON.stringify(parsed, null, 2);
-          setOutput(formatted);
-          updateStats(formatted);
-        }
-        trackEvent('json_upload', { fileName: file.name });
-      };
-      reader.readAsText(file);
-    },
-    [trackEvent, updateStats]
-  );
-
-  const addToHistory = useCallback((json: string) => {
-    setHistory((prev) => {
-      const newHistory = [json, ...prev.slice(0, 9)];
-      return newHistory;
-    });
-  }, []);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      setInput(content);
+      if (isValidJSON(content)) {
+        const parsed = JSON.parse(content);
+        const formatted = JSON.stringify(parsed, null, 2);
+        setOutput(formatted);
+        updateStats(formatted);
+      }
+    };
+    reader.readAsText(file);
+  }, [updateStats]);
 
   const isValid = isValidJSON(input);
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="max-w-7xl mx-auto space-y-6"
-    >
-      {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <FileJson className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">JSON Formatter</h1>
-            <p className="text-muted-foreground text-sm">
-              Format, validate, and beautify your JSON data
-            </p>
-          </div>
-        </div>
+    <ToolLayout
+      title="JSON Formatter"
+      description="Format, validate, and beautify your JSON data with syntax highlighting"
+      icon={<FileJson className="h-8 w-8" />}
+      color="text-blue-500"
+      bgColor="bg-blue-500/10"
+      actions={
         <div className="flex items-center gap-2">
           <input
             type="file"
@@ -422,185 +326,183 @@ const Tool: React.FC = () => {
             id="json-upload"
           />
           <label htmlFor="json-upload">
-            <Button variant="outline" size="sm" className="cursor-pointer" asChild>
-              <span>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload
-              </span>
-            </Button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">Upload</span>
+            </motion.button>
           </label>
-          <Button variant="outline" size="sm" onClick={handleClear}>
-            <Trash2 className="w-4 h-4 mr-2" />
-            Clear
-          </Button>
         </div>
-      </motion.div>
+      }
+    >
+      <div className="space-y-6">
+        {/* Stats Bar */}
+        <AnimatePresence>
+          {stats && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3"
+            >
+              <StatCard label="Size" value={stats.size} icon={<FileCode className="h-4 w-4" />} delay={0} />
+              <StatCard label="Lines" value={stats.lines} icon={<AlignLeft className="h-4 w-4" />} delay={0.05} />
+              <StatCard label="Keys" value={stats.keys} icon={<Hash className="h-4 w-4" />} delay={0.1} />
+              <StatCard label="Objects" value={stats.objects} icon={<Braces className="h-4 w-4" />} delay={0.15} />
+              <StatCard label="Arrays" value={stats.arrays} icon={<Layers className="h-4 w-4" />} delay={0.2} />
+              <StatCard label="Strings" value={stats.strings} icon={<Type className="h-4 w-4" />} delay={0.25} />
+              <StatCard label="Numbers" value={stats.numbers} icon={<Hash className="h-4 w-4" />} delay={0.3} />
+              <StatCard label="Booleans" value={stats.booleans} icon={<Check className="h-4 w-4" />} delay={0.35} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Error Alert */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            <Alert variant="destructive">
-              <AlertCircle className="w-4 h-4" />
-              <AlertDescription>{error.message}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input Section */}
-        <Card className="flex flex-col">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <AlignLeft className="w-4 h-4" />
-                Input
-              </span>
-              {input && (
-                <Badge variant={isValid ? 'default' : 'destructive'}>
-                  {isValid ? 'Valid JSON' : 'Invalid'}
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-0">
-            <Textarea
-              value={input}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="Paste your JSON here..."
-              className="min-h-[400px] font-mono text-sm resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              spellCheck={false}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Output Section */}
-        <Card className="flex flex-col">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Wand2 className="w-4 h-4" />
-                Output
-              </span>
+        {/* Error Alert */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-600 dark:text-red-400"
+            >
               <div className="flex items-center gap-2">
-                {output && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCopy}
-                      className="h-7 px-2"
-                    >
-                      {copied ? (
-                        <Check className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleDownload}
-                      className="h-7 px-2"
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
-                  </>
-                )}
+                <AlertCircle className="h-5 w-5" />
+                <span className="font-medium">{error}</span>
               </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-0">
-            {output ? (
-              <div className="min-h-[400px] max-h-[400px] overflow-auto p-4 bg-muted/30">
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Input/Output Grid */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Input Section */}
+          <SectionCard 
+            title="Input" 
+            icon={<Code2 className="h-5 w-5" />}
+            delay={0.1}
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {input && (
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                      isValid 
+                        ? 'bg-green-500/10 text-green-600 dark:text-green-400' 
+                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    }`}>
+                      {isValid ? 'Valid JSON' : 'Invalid'}
+                    </span>
+                  )}
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleClear}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear
+                </motion.button>
+              </div>
+              <InputArea
+                value={input}
+                onChange={handleInputChange}
+                placeholder="Paste your JSON here..."
+                rows={15}
+              />
+            </div>
+          </SectionCard>
+
+          {/* Output Section */}
+          <SectionCard 
+            title="Formatted Output" 
+            icon={<Wand2 className="h-5 w-5" />}
+            delay={0.2}
+          >
+            <OutputArea 
+              label="Result"
+              copyValue={output}
+              actions={
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleDownload}
+                  disabled={!output}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download
+                </motion.button>
+              }
+            >
+              {output ? (
                 <SyntaxHighlightedJSON json={output} />
-              </div>
-            ) : (
-              <div className="min-h-[400px] flex items-center justify-center text-muted-foreground">
-                <span className="text-sm">Output will appear here</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+              ) : (
+                <div className="flex h-full min-h-[300px] items-center justify-center text-muted-foreground">
+                  <span className="text-sm">Output will appear here</span>
+                </div>
+              )}
+            </OutputArea>
+          </SectionCard>
+        </div>
 
-      {/* Action Buttons */}
-      <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3">
-        <Button onClick={formatJSON} disabled={!input} className="gap-2">
-          <AlignLeft className="w-4 h-4" />
-          Format / Prettify
-        </Button>
-        <Button onClick={minifyJSON} disabled={!input} variant="secondary" className="gap-2">
-          <Minimize2 className="w-4 h-4" />
-          Minify
-        </Button>
-        <Button onClick={validateJSON} disabled={!input} variant="outline" className="gap-2">
-          <Check className="w-4 h-4" />
-          Validate
-        </Button>
-        <Button onClick={handleCopy} disabled={!output} variant="outline" className="gap-2">
-          {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-          Copy Result
-        </Button>
-      </motion.div>
-
-      {/* Statistics */}
-      {stats && (
-        <motion.div variants={itemVariants}>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Statistics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-4">
-                <StatItem label="Size" value={stats.size} />
-                <StatItem label="Lines" value={stats.lines.toString()} />
-                <StatItem label="Keys" value={stats.keys.toString()} />
-                <StatItem label="Objects" value={stats.objects.toString()} />
-                <StatItem label="Arrays" value={stats.arrays.toString()} />
-                <StatItem label="Strings" value={stats.strings.toString()} />
-                <StatItem label="Numbers" value={stats.numbers.toString()} />
-                <StatItem label="Booleans" value={stats.booleans.toString()} />
-                <StatItem label="Nulls" value={stats.nulls.toString()} />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Action Buttons */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex flex-wrap gap-3"
+        >
+          <ActionButton 
+            onClick={formatJSON} 
+            variant="primary"
+            icon={<AlignLeft className="h-4 w-4" />}
+            disabled={!input}
+          >
+            Format / Prettify
+          </ActionButton>
+          <ActionButton 
+            onClick={minifyJSON} 
+            variant="secondary"
+            icon={<Minimize2 className="h-4 w-4" />}
+            disabled={!input}
+          >
+            Minify
+          </ActionButton>
         </motion.div>
-      )}
 
-      {/* Quick Tips */}
-      <motion.div variants={itemVariants}>
-        <Card className="bg-muted/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Quick Tips</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-              <li>Paste JSON into the input field to automatically format it</li>
-              <li>Use the &quot;Minify&quot; button to compress JSON for transmission</li>
-              <li>Upload a JSON file using the Upload button</li>
-              <li>Download the formatted JSON using the download button</li>
-              <li>All formatting happens locally - your data never leaves your browser</li>
-            </ul>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </motion.div>
+        {/* Tips Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="rounded-2xl border bg-muted/30 p-6"
+        >
+          <h4 className="mb-3 font-semibold">Quick Tips</h4>
+          <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+            <li className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Paste JSON to automatically validate and format
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Use "Minify" to compress JSON for transmission
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Upload JSON files directly from your computer
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Download formatted JSON for later use
+            </li>
+          </ul>
+        </motion.div>
+      </div>
+    </ToolLayout>
   );
-};
-
-// Stat Item Component
-const StatItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="text-center p-3 rounded-lg bg-muted">
-    <div className="text-lg font-semibold">{value}</div>
-    <div className="text-xs text-muted-foreground">{label}</div>
-  </div>
-);
-
-export default Tool;
+}

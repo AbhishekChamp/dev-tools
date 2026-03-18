@@ -1,5 +1,4 @@
-import { lazy } from 'react';
-import type { Tool, ToolRegistryEntry } from '@/types';
+import type { Tool } from '@/types';
 import {
   FileJson,
   Regex,
@@ -8,6 +7,18 @@ import {
   Lock,
   type LucideIcon,
 } from 'lucide-react';
+
+// Import tools directly - aliases in vite.config.ts map these to source files
+// @ts-expect-error - Alias to json-formatter source
+import JsonTool from 'jsonFormatterApp/Tool';
+// @ts-expect-error - Alias to regex-tester source  
+import RegexTool from 'regexTesterApp/Tool';
+// @ts-expect-error - Alias to jwt-decoder source
+import JwtTool from 'jwtDecoderApp/Tool';
+// @ts-expect-error - Alias to base64-tool source
+import Base64ToolComp from 'base64ToolApp/Tool';
+// @ts-expect-error - Alias to password-generator source
+import PasswordTool from 'passwordGeneratorApp/Tool';
 
 const iconMap: Record<string, LucideIcon> = {
   FileJson,
@@ -27,7 +38,7 @@ export const builtInTools: Tool[] = [
     category: 'formatter',
     tags: ['json', 'format', 'validate', 'beautify'],
     remote: 'jsonFormatterApp',
-    component: lazy(() => import('jsonFormatterApp/Tool')),
+    component: JsonTool,
   },
   {
     id: 'regex-tester',
@@ -38,7 +49,7 @@ export const builtInTools: Tool[] = [
     category: 'tester',
     tags: ['regex', 'test', 'pattern', 'match'],
     remote: 'regexTesterApp',
-    component: lazy(() => import('regexTesterApp/Tool')),
+    component: RegexTool,
   },
   {
     id: 'jwt-decoder',
@@ -49,7 +60,7 @@ export const builtInTools: Tool[] = [
     category: 'encoder',
     tags: ['jwt', 'decode', 'token', 'auth'],
     remote: 'jwtDecoderApp',
-    component: lazy(() => import('jwtDecoderApp/Tool')),
+    component: JwtTool,
   },
   {
     id: 'base64-tool',
@@ -60,7 +71,7 @@ export const builtInTools: Tool[] = [
     category: 'encoder',
     tags: ['base64', 'encode', 'decode', 'convert'],
     remote: 'base64ToolApp',
-    component: lazy(() => import('base64ToolApp/Tool')),
+    component: Base64ToolComp,
   },
   {
     id: 'password-generator',
@@ -71,7 +82,7 @@ export const builtInTools: Tool[] = [
     category: 'generator',
     tags: ['password', 'generator', 'security', 'random'],
     remote: 'passwordGeneratorApp',
-    component: lazy(() => import('passwordGeneratorApp/Tool')),
+    component: PasswordTool,
   },
 ];
 
@@ -109,7 +120,7 @@ export function filterTools(
 export async function loadRemoteTool(entry: string): Promise<Tool | null> {
   try {
     // @ts-expect-error - Module Federation runtime
-    const module = await import(entry);
+    const module = await import(/* @vite-ignore */ entry);
     if (module.default) {
       return {
         ...module.metadata,

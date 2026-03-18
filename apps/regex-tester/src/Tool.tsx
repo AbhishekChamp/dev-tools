@@ -6,23 +6,23 @@ import {
   Check,
   AlertCircle,
   Trash2,
-  RefreshCcw,
+  Lightbulb,
   ChevronDown,
   ChevronUp,
-  Lightbulb,
+  Zap,
+  Search,
+  Type,
+  Hash,
+  Target,
+  FileCode,
 } from 'lucide-react';
 import {
-  ToolContainer,
-  Button,
-  Input,
-  Textarea,
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CopyButton,
-} from '@dev-tools/ui';
+  ToolLayout,
+  ActionButton,
+  SectionCard,
+  StatCard,
+  InputArea,
+} from '@dev-tools/tool-sdk';
 import { cn } from '@dev-tools/ui/utils';
 
 interface RegexMatch {
@@ -59,7 +59,7 @@ const REGEX_EXAMPLES: RegexExample[] = [
     name: 'Phone Number (US)',
     pattern: '\\(?(\\d{3})\\)?[-.\\s]?(\\d{3})[-.\\s]?(\\d{4})',
     flags: 'g',
-    description: 'Match US phone numbers with optional separators',
+    description: 'Match US phone numbers',
     testString: 'Call (555) 123-4567 or 555.987.6543',
   },
   {
@@ -87,19 +87,18 @@ const REGEX_EXAMPLES: RegexExample[] = [
 
 const FLAGS = [
   { flag: 'g', name: 'Global', description: 'Find all matches' },
-  { flag: 'i', name: 'Ignore Case', description: 'Case-insensitive matching' },
-  { flag: 'm', name: 'Multiline', description: '^ and $ match line boundaries' },
+  { flag: 'i', name: 'Ignore Case', description: 'Case-insensitive' },
+  { flag: 'm', name: 'Multiline', description: '^ and $ match lines' },
   { flag: 's', name: 'Dot All', description: '. matches newlines' },
-  { flag: 'u', name: 'Unicode', description: 'Unicode-aware matching' },
-  { flag: 'y', name: 'Sticky', description: 'Match from lastIndex only' },
+  { flag: 'u', name: 'Unicode', description: 'Unicode aware' },
+  { flag: 'y', name: 'Sticky', description: 'Sticky matching' },
 ];
 
-function Tool() {
+export default function RegexTester() {
   const [pattern, setPattern] = useState<string>('');
   const [flags, setFlags] = useState<Set<string>>(new Set(['g']));
   const [testString, setTestString] = useState<string>('');
   const [showExamples, setShowExamples] = useState(false);
-  const [copiedPattern, setCopiedPattern] = useState(false);
 
   const toggleFlag = useCallback((flag: string) => {
     setFlags((prev) => {
@@ -223,51 +222,31 @@ function Tool() {
     setTestString('');
   }, []);
 
-  const copyRegex = useCallback(async () => {
-    if (!regex) return;
-    const flagsStr = Array.from(flags).join('');
-    const regexLiteral = `/${pattern}/${flagsStr}`;
-    try {
-      await navigator.clipboard.writeText(regexLiteral);
-      setCopiedPattern(true);
-      setTimeout(() => setCopiedPattern(false), 2000);
-    } catch {
-      // Ignore copy errors
-    }
-  }, [regex, pattern, flags]);
-
   const flagsStr = Array.from(flags).join('');
-  const regexLiteral = pattern ? `/${pattern}/${flagsStr}` : '//g';
 
   return (
-    <ToolContainer
+    <ToolLayout
       title="Regex Tester"
-      description="Test and debug regular expressions with real-time matching"
-      headerAction={
+      description="Test and debug regular expressions with real-time matching and visual feedback"
+      icon={<Regex className="h-8 w-8" />}
+      color="text-purple-500"
+      bgColor="bg-purple-500/10"
+      actions={
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowExamples(!showExamples)}
-            className="gap-2"
+            className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
           >
             <Lightbulb className="h-4 w-4" />
-            Examples
+            <span className="hidden sm:inline">Examples</span>
             {showExamples ? (
-              <ChevronUp className="h-3 w-3" />
+              <ChevronUp className="h-4 w-4" />
             ) : (
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="h-4 w-4" />
             )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAll}
-            className="gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Clear
-          </Button>
+          </motion.button>
         </div>
       }
     >
@@ -279,217 +258,202 @@ function Tool() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <Card className="border-dashed">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4 text-yellow-500" />
-                    Common Patterns
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {REGEX_EXAMPLES.map((example) => (
-                      <button
-                        key={example.name}
-                        onClick={() => loadExample(example)}
-                        className="text-left p-3 rounded-lg border bg-card hover:bg-accent hover:border-accent transition-all duration-200 group"
-                      >
-                        <div className="font-medium text-sm group-hover:text-accent-foreground">
-                          {example.name}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1 font-mono truncate">
-                          /{example.pattern}/{example.flags}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {example.description}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <SectionCard title="Common Patterns" icon={<Lightbulb className="h-5 w-5 text-yellow-500" />}>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {REGEX_EXAMPLES.map((example, index) => (
+                    <motion.button
+                      key={example.name}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => loadExample(example)}
+                      className="rounded-xl border bg-card p-4 text-left transition-all hover:border-primary/50 hover:shadow-md"
+                    >
+                      <div className="font-medium">{example.name}</div>
+                      <div className="mt-1 font-mono text-xs text-muted-foreground truncate">
+                        /{example.pattern}/{example.flags}
+                      </div>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {example.description}
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </SectionCard>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Pattern Input */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Regular Expression</label>
-            <div className="flex items-center gap-2">
-              {regex && !error && (
-                <CopyButton
-                  text={() => regexLiteral}
-                  variant="ghost"
-                  size="sm"
+        <SectionCard title="Pattern" icon={<Hash className="h-5 w-5" />} delay={0.1}>
+          <div className="space-y-4">
+            <div className="relative">
+              <div className="flex items-center gap-2 rounded-xl border bg-background px-4 py-3">
+                <span className="text-muted-foreground font-mono text-lg">/</span>
+                <input
+                  type="text"
+                  value={pattern}
+                  onChange={(e) => setPattern(e.target.value)}
+                  placeholder="Enter regex pattern..."
+                  className="flex-1 bg-transparent font-mono text-base outline-none"
                 />
-              )}
-              <Badge variant={error ? 'destructive' : 'secondary'}>
-                {regexLiteral}
-              </Badge>
+                <span className="text-muted-foreground font-mono text-lg">/{flagsStr}</span>
+              </div>
+              
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-2 flex items-center gap-2 text-sm text-red-500"
+                  >
+                    <AlertCircle className="h-4 w-4" />
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Flags */}
+            <div className="flex flex-wrap gap-2">
+              {FLAGS.map(({ flag, name, description }) => (
+                <motion.button
+                  key={flag}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => toggleFlag(flag)}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all',
+                    flags.has(flag)
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  )}
+                  title={description}
+                >
+                  <span className="font-mono">{flag}</span>
+                  <span className="text-xs opacity-80">{name}</span>
+                </motion.button>
+              ))}
             </div>
           </div>
-
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-lg">
-                /
-              </span>
-              <Input
-                value={pattern}
-                onChange={(e) => setPattern(e.target.value)}
-                placeholder="Enter regex pattern..."
-                className={cn(
-                  'pl-7 pr-4 font-mono text-base',
-                  error && 'border-destructive focus-visible:ring-destructive'
-                )}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-lg">
-                /{flagsStr}
-              </span>
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex items-center gap-2 text-sm text-destructive"
-              >
-                <AlertCircle className="h-4 w-4" />
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Flags */}
-          <div className="flex flex-wrap gap-2">
-            {FLAGS.map(({ flag, name, description }) => (
-              <button
-                key={flag}
-                onClick={() => toggleFlag(flag)}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200',
-                  flags.has(flag)
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                )}
-                title={description}
-              >
-                <span className="font-mono">{flag}</span>
-                <span className="text-xs opacity-80">{name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        </SectionCard>
 
         {/* Test String Input */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Test String</label>
+        <SectionCard title="Test String" icon={<Type className="h-5 w-5" />} delay={0.2}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-muted-foreground">
+              Enter text to test against the regex pattern
+            </span>
             {testString && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setTestString('')}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
               >
+                <Trash2 className="h-3.5 w-3.5" />
                 Clear
-              </Button>
+              </motion.button>
             )}
           </div>
-          <Textarea
+          <textarea
             value={testString}
             onChange={(e) => setTestString(e.target.value)}
-            placeholder="Enter text to test against the regex..."
-            className="min-h-[120px] font-mono text-sm resize-y"
+            placeholder="Enter text to test..."
+            rows={5}
+            className="w-full rounded-xl border bg-background px-4 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
-        </div>
+        </SectionCard>
 
-        {/* Match Results */}
+        {/* Results */}
         {testString && regex && !error && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4 }}
             className="space-y-4"
           >
+            {/* Match Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <StatCard 
+                label="Matches" 
+                value={matches.length} 
+                icon={<Target className="h-4 w-4" />}
+                delay={0}
+              />
+              <StatCard 
+                label="Capture Groups" 
+                value={matches.reduce((acc, m) => acc + m.groups.length, 0)} 
+                icon={<Hash className="h-4 w-4" />}
+                delay={0.1}
+              />
+              <StatCard 
+                label="Pattern Valid" 
+                value="Yes" 
+                icon={<Check className="h-4 w-4 text-green-500" />}
+                delay={0.2}
+              />
+            </div>
+
             {/* Highlighted Text */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium">
-                    Match Preview
-                  </CardTitle>
-                  <Badge variant={matches.length > 0 ? 'default' : 'secondary'}>
-                    {matches.length} {matches.length === 1 ? 'match' : 'matches'}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="p-4 rounded-lg bg-muted/50 font-mono text-sm whitespace-pre-wrap break-all leading-relaxed">
-                  {highlightedText || (
-                    <span className="text-muted-foreground italic">
-                      No matches found
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <SectionCard title="Match Preview" icon={<Search className="h-5 w-5" />} delay={0.1}>
+              <div className="rounded-xl bg-muted/50 p-4 font-mono text-sm whitespace-pre-wrap break-all leading-relaxed">
+                {highlightedText || (
+                  <span className="text-muted-foreground italic">
+                    No matches found
+                  </span>
+                )}
+              </div>
+            </SectionCard>
 
             {/* Match Details */}
             {matches.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">
-                    Match Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                    {matches.map((match, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="flex items-start gap-3 p-3 rounded-lg border bg-card"
-                      >
-                        <Badge variant="outline" className="mt-0.5 shrink-0">
-                          #{index + 1}
-                        </Badge>
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <code className="px-2 py-1 rounded bg-primary/10 text-primary font-mono text-sm">
-                              {match.text}
-                            </code>
-                            <span className="text-xs text-muted-foreground">
-                              at position {match.index}
-                            </span>
-                          </div>
-                          {match.groups.length > 0 && (
-                            <div className="text-sm text-muted-foreground">
-                              Groups:{' '}
-                              {match.groups.map((group, i) => (
-                                <span key={i}>
-                                  <code className="text-foreground font-mono">
-                                    {group || '(empty)'}
-                                  </code>
-                                  {i < match.groups.length - 1 && ', '}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+              <SectionCard title="Match Details" icon={<FileCode className="h-5 w-5" />} delay={0.2}>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {matches.map((match, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-start gap-3 p-3 rounded-xl border bg-card"
+                    >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <code className="px-2 py-1 rounded-lg bg-primary/10 text-primary font-mono text-sm">
+                            {match.text}
+                          </code>
+                          <span className="text-xs text-muted-foreground">
+                            at position {match.index}
+                          </span>
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                        {match.groups.length > 0 && (
+                          <div className="text-sm text-muted-foreground">
+                            Groups:{' '}
+                            {match.groups.map((group, i) => (
+                              <span key={i}>
+                                <code className="text-foreground font-mono bg-muted px-1 rounded">
+                                  {group || '(empty)'}
+                                </code>
+                                {i < match.groups.length - 1 && ', '}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </SectionCard>
             )}
           </motion.div>
         )}
@@ -497,23 +461,38 @@ function Tool() {
         {/* Empty State */}
         {!pattern && !testString && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-12 text-center"
           >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Regex className="h-8 w-8 text-primary" />
+            <div className="rounded-full bg-primary/10 p-4">
+              <Zap className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-lg font-medium mb-2">Ready to test</h3>
-            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            <h3 className="mt-4 text-lg font-medium">Ready to test</h3>
+            <p className="mt-2 text-sm text-muted-foreground max-w-sm">
               Enter a regex pattern and test string to see matches in real-time.
               Try the Examples dropdown for common patterns.
             </p>
           </motion.div>
         )}
+
+        {/* Clear Button */}
+        {(pattern || testString) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-center"
+          >
+            <ActionButton 
+              onClick={clearAll} 
+              variant="ghost"
+              icon={<Trash2 className="h-4 w-4" />}
+            >
+              Clear All
+            </ActionButton>
+          </motion.div>
+        )}
       </div>
-    </ToolContainer>
+    </ToolLayout>
   );
 }
-
-export default Tool;

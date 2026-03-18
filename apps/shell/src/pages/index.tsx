@@ -1,96 +1,176 @@
 import * as React from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Wrench, Sparkles } from 'lucide-react';
-import { SearchBar } from '@/components/SearchBar';
+import { Wrench, Sparkles, Zap, Shield } from 'lucide-react';
+import { AppCard } from '@dev-tools/ui';
 import { CategoryFilter } from '@/components/CategoryFilter';
-import { ToolCard } from '@/components/ToolCard';
-import { builtInTools, filterTools } from '@/utils/tools';
+import { builtInTools, filterTools, getIconComponent } from '@/utils/tools';
 import type { ToolCategory } from '@/types';
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 });
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
 function HomePage() {
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] =
     React.useState<ToolCategory>('all');
 
-  const filteredTools = filterTools(
-    builtInTools,
-    searchQuery,
-    selectedCategory
-  );
+  const filteredTools = filterTools(builtInTools, '', selectedCategory);
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="space-y-4"
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-            <Wrench className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Developer Tools
-            </h1>
-            <p className="text-muted-foreground">
-              A collection of useful utilities for developers
-            </p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Search and Filter */}
-      <motion.div
+    <div className="mx-auto max-w-7xl space-y-8">
+      {/* Hero Section */}
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="space-y-4"
+        transition={{ duration: 0.6 }}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-8 lg:p-12"
       >
-        <SearchBar
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search tools by name, description, or tags..."
-        />
-        <CategoryFilter
-          value={selectedCategory}
-          onChange={setSelectedCategory}
-        />
-      </motion.div>
+        {/* Background decoration */}
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
+        
+        <div className="relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>5 Developer Tools Available</span>
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-4xl font-bold tracking-tight lg:text-5xl"
+          >
+            Developer Tools Platform
+          </motion.h1>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-4 max-w-2xl text-lg text-muted-foreground"
+          >
+            A collection of powerful utilities to help you format, validate, and 
+            transform data. All tools run locally in your browser for maximum privacy.
+          </motion.p>
+
+          {/* Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-8 flex flex-wrap gap-6"
+          >
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Zap className="h-4 w-4 text-yellow-500" />
+              <span>Lightning Fast</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Shield className="h-4 w-4 text-green-500" />
+              <span>Privacy First</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Wrench className="h-4 w-4 text-primary" />
+              <span>Always Free</span>
+            </div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Category Filter */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Available Tools</h2>
+          <CategoryFilter
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+          />
+        </div>
+      </motion.section>
 
       {/* Tools Grid */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      <motion.section
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
       >
-        {filteredTools.map((tool, index) => (
-          <ToolCard key={tool.id} tool={tool} index={index} />
-        ))}
-      </motion.div>
+        {filteredTools.map((tool, index) => {
+          const Icon = getIconComponent(tool.icon);
+          return (
+            <motion.div key={tool.id} variants={itemVariants}>
+              <AppCard
+                title={tool.name}
+                description={tool.description}
+                icon={<Icon className="h-8 w-8" />}
+                onClick={() => navigate({ to: tool.route })}
+                delay={index * 0.1}
+              />
+            </motion.div>
+          );
+        })}
+      </motion.section>
 
       {/* Empty State */}
       {filteredTools.length === 0 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center"
+          className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-16 text-center"
         >
-          <Sparkles className="h-12 w-12 text-muted-foreground" />
+          <div className="rounded-full bg-muted p-4">
+            <Sparkles className="h-8 w-8 text-muted-foreground" />
+          </div>
           <h3 className="mt-4 text-lg font-semibold">No tools found</h3>
           <p className="text-muted-foreground">
-            Try adjusting your search or filter to find what you're looking for.
+            Try selecting a different category.
           </p>
         </motion.div>
       )}
+
+      {/* Footer Note */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="text-center text-sm text-muted-foreground"
+      >
+        Press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">⌘K</kbd> or{' '}
+        <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">Ctrl+K</kbd> to quickly search tools
+      </motion.p>
     </div>
   );
 }
