@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileJson,
@@ -16,16 +16,25 @@ import {
   Hash,
   Braces,
   FileCode,
+  Copy,
+  Command,
+  X,
+  Home,
+  Regex,
+  KeyRound,
+  ArrowLeftRight,
+  Lock,
 } from 'lucide-react';
-import { 
-  ToolLayout, 
-  ActionButton, 
-  SectionCard, 
-  StatCard,
-  InputArea,
-  OutputArea 
-} from '@dev-tools/tool-sdk';
 import { isValidJSON } from '@dev-tools/utils';
+
+// Tool definitions for Cmd+E switcher
+const tools = [
+  { id: 'json', name: 'JSON Formatter', route: 'http://localhost:3001', icon: FileJson, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { id: 'regex', name: 'Regex Tester', route: 'http://localhost:3002', icon: Regex, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  { id: 'jwt', name: 'JWT Decoder', route: 'http://localhost:3003', icon: KeyRound, color: 'text-green-500', bg: 'bg-green-500/10' },
+  { id: 'base64', name: 'Base64 Tool', route: 'http://localhost:3004', icon: ArrowLeftRight, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  { id: 'password', name: 'Password Generator', route: 'http://localhost:3005', icon: Lock, color: 'text-red-500', bg: 'bg-red-500/10' },
+];
 
 interface JSONStats {
   size: string;
@@ -37,6 +46,110 @@ interface JSONStats {
   numbers: number;
   booleans: number;
   nulls: number;
+}
+
+// Cmd+E Switcher Component
+function ToolSwitcher() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        setIsOpen(prev => !prev);
+      }
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setIsOpen(false)}
+        >
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          />
+          
+          {/* Modal Content */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-lg"
+          >
+            <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl">
+              <div className="flex items-center justify-between border-b px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Command className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Switch Application</span>
+                </div>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-lg p-1 text-muted-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="p-2">
+                <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  All Tools
+                </p>
+                {tools.map((tool, index) => {
+                  const Icon = tool.icon;
+                  const isActive = tool.id === 'json';
+                  return (
+                    <motion.a
+                      key={tool.id}
+                      href={tool.route}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-accent'
+                      }`}
+                    >
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                        isActive ? 'bg-primary-foreground/20' : tool.bg
+                      }`}>
+                        <Icon className={`h-5 w-5 ${isActive ? 'text-primary-foreground' : tool.color}`} />
+                      </div>
+                      <span className="flex-1 font-medium">{tool.name}</span>
+                      {isActive && (
+                        <span className="text-xs opacity-80">Current</span>
+                      )}
+                    </motion.a>
+                  );
+                })}
+              </div>
+              <div className="border-t bg-muted/30 px-4 py-3">
+                <a
+                  href="http://localhost:3000/"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  <Home className="h-4 w-4" />
+                  Back to DevTools Home
+                </a>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 // Syntax highlighter component for JSON
@@ -185,11 +298,78 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
+// Animated Stat Card
+function StatCard({ label, value, icon: Icon, delay = 0 }: { 
+  label: string; 
+  value: string | number; 
+  icon: React.ElementType;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.05, y: -2 }}
+      className="rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            {label}
+          </p>
+          <p className="text-xl font-bold">{value}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// Action Button with animation
+function ActionButton({ 
+  children, 
+  onClick, 
+  variant = 'primary',
+  icon: Icon,
+  disabled = false
+}: { 
+  children: React.ReactNode; 
+  onClick?: () => void; 
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  icon?: React.ElementType;
+  disabled?: boolean;
+}) {
+  const variants = {
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
+    outline: 'border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground',
+    ghost: 'hover:bg-accent hover:text-accent-foreground',
+  };
+
+  return (
+    <motion.button
+      whileHover={disabled ? {} : { scale: 1.02 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
+      onClick={onClick}
+      disabled={disabled}
+      className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none ${variants[variant]}`}
+    >
+      {Icon && <Icon className="h-4 w-4" />}
+      {children}
+    </motion.button>
+  );
+}
+
 export default function JSONFormatter() {
   const [input, setInput] = useState<string>('');
   const [output, setOutput] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [stats, setStats] = useState<JSONStats | null>(null);
+  const [copied, setCopied] = useState(false);
+  const outputRef = useRef<HTMLDivElement>(null);
 
   // Load sample JSON on mount
   useEffect(() => {
@@ -197,14 +377,15 @@ export default function JSONFormatter() {
       name: 'John Doe',
       age: 30,
       email: 'john.doe@example.com',
+      isActive: true,
+      balance: 1234.56,
       address: {
         street: '123 Main St',
         city: 'New York',
+        country: 'USA',
         zipCode: '10001',
       },
       hobbies: ['reading', 'gaming', 'coding'],
-      isActive: true,
-      balance: 1234.56,
       metadata: null,
     }, null, 2);
     setInput(sampleJSON);
@@ -289,6 +470,17 @@ export default function JSONFormatter() {
     URL.revokeObjectURL(url);
   }, [output]);
 
+  const handleCopy = useCallback(async () => {
+    if (!output) return;
+    try {
+      await navigator.clipboard.writeText(output);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Ignore copy errors
+    }
+  }, [output]);
+
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -310,199 +502,266 @@ export default function JSONFormatter() {
   const isValid = isValidJSON(input);
 
   return (
-    <ToolLayout
-      title="JSON Formatter"
-      description="Format, validate, and beautify your JSON data with syntax highlighting"
-      icon={<FileJson className="h-8 w-8" />}
-      color="text-blue-500"
-      bgColor="bg-blue-500/10"
-      actions={
-        <div className="flex items-center gap-2">
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleFileUpload}
-            className="hidden"
-            id="json-upload"
-          />
-          <label htmlFor="json-upload">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-            >
-              <Upload className="h-4 w-4" />
-              <span className="hidden sm:inline">Upload</span>
-            </motion.button>
-          </label>
+    <div className="min-h-screen bg-background">
+      {/* Tool Switcher */}
+      <ToolSwitcher />
+
+      {/* Clean Header */}
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="border-b bg-card/80 backdrop-blur-xl"
+      >
+        <div className="mx-auto max-w-[1920px] px-4 sm:px-6 lg:px-8">
+          <div className="flex h-14 items-center justify-between">
+            <div className="flex items-center gap-4">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500 text-white"
+              >
+                <FileJson className="h-5 w-5" />
+              </motion.div>
+              <div>
+                <h1 className="text-lg font-bold">JSON Formatter</h1>
+                <p className="hidden text-xs text-muted-foreground sm:block">
+                  Format, validate, and beautify JSON
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="hidden text-xs text-muted-foreground md:block">
+                Press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">⌘E</kbd> to switch apps
+              </span>
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="json-upload"
+              />
+              <label htmlFor="json-upload">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="hidden sm:inline">Upload</span>
+                </motion.button>
+              </label>
+            </div>
+          </div>
         </div>
-      }
-    >
-      <div className="space-y-6">
-        {/* Stats Bar */}
-        <AnimatePresence>
-          {stats && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3"
-            >
-              <StatCard label="Size" value={stats.size} icon={<FileCode className="h-4 w-4" />} delay={0} />
-              <StatCard label="Lines" value={stats.lines} icon={<AlignLeft className="h-4 w-4" />} delay={0.05} />
-              <StatCard label="Keys" value={stats.keys} icon={<Hash className="h-4 w-4" />} delay={0.1} />
-              <StatCard label="Objects" value={stats.objects} icon={<Braces className="h-4 w-4" />} delay={0.15} />
-              <StatCard label="Arrays" value={stats.arrays} icon={<Layers className="h-4 w-4" />} delay={0.2} />
-              <StatCard label="Strings" value={stats.strings} icon={<Type className="h-4 w-4" />} delay={0.25} />
-              <StatCard label="Numbers" value={stats.numbers} icon={<Hash className="h-4 w-4" />} delay={0.3} />
-              <StatCard label="Booleans" value={stats.booleans} icon={<Check className="h-4 w-4" />} delay={0.35} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+      </motion.header>
+
+      {/* Main Content - Fixed Height Layout */}
+      <main className="mx-auto max-w-[1920px] px-4 sm:px-6 lg:px-8 py-4">
+        {/* Input/Output Section - Fixed Height */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="grid gap-4 lg:grid-cols-2 mb-6"
+        >
+          {/* Input Panel */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="flex flex-col rounded-2xl border bg-card shadow-sm overflow-hidden"
+            style={{ height: 'calc(50vh - 80px)', minHeight: '300px' }}
+          >
+            {/* Input Header */}
+            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Code2 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold">Input</span>
+                {input && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      isValid
+                        ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    }`}
+                  >
+                    {isValid ? 'Valid' : 'Invalid'}
+                  </motion.span>
+                )}
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleClear}
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                title="Clear"
+              >
+                <Trash2 className="h-4 w-4" />
+              </motion.button>
+            </div>
+
+            {/* Input Area */}
+            <div className="flex-1 relative">
+              <textarea
+                value={input}
+                onChange={(e) => handleInputChange(e.target.value)}
+                placeholder="Paste your JSON here..."
+                className="h-full w-full resize-none border-0 bg-transparent p-4 font-mono text-sm focus:outline-none focus:ring-0"
+                spellCheck={false}
+              />
+            </div>
+          </motion.div>
+
+          {/* Output Panel */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="flex flex-col rounded-2xl border bg-card shadow-sm overflow-hidden"
+            style={{ height: 'calc(50vh - 80px)', minHeight: '300px' }}
+          >
+            {/* Output Header */}
+            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Wand2 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold">Formatted Output</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {output && (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleCopy}
+                      className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                      title="Copy"
+                    >
+                      {copied ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleDownload}
+                      className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                      title="Download"
+                    >
+                      <Download className="h-4 w-4" />
+                    </motion.button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Output Area */}
+            <div ref={outputRef} className="flex-1 overflow-auto bg-muted/20">
+              {output ? (
+                <div className="p-4">
+                  <SyntaxHighlightedJSON json={output} />
+                </div>
+              ) : (
+                <div className="flex h-full items-center justify-center text-muted-foreground">
+                  <span className="text-sm">Output will appear here</span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Action Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex flex-wrap items-center justify-center gap-3 mb-6"
+        >
+          <ActionButton
+            onClick={formatJSON}
+            variant="primary"
+            icon={AlignLeft}
+            disabled={!input}
+          >
+            Format / Prettify
+          </ActionButton>
+          <ActionButton
+            onClick={minifyJSON}
+            variant="secondary"
+            icon={Minimize2}
+            disabled={!input}
+          >
+            Minify
+          </ActionButton>
+          <ActionButton
+            onClick={handleCopy}
+            variant="outline"
+            icon={copied ? Check : Copy}
+            disabled={!output}
+          >
+            {copied ? 'Copied!' : 'Copy Result'}
+          </ActionButton>
+          <ActionButton
+            onClick={handleDownload}
+            variant="outline"
+            icon={Download}
+            disabled={!output}
+          >
+            Download
+          </ActionButton>
+        </motion.div>
 
         {/* Error Alert */}
         <AnimatePresence>
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-600 dark:text-red-400"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6"
             >
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
+              <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-600 dark:text-red-400">
+                <AlertCircle className="h-5 w-5 shrink-0" />
                 <span className="font-medium">{error}</span>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Input/Output Grid */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Input Section */}
-          <SectionCard 
-            title="Input" 
-            icon={<Code2 className="h-5 w-5" />}
-            delay={0.1}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {input && (
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      isValid 
-                        ? 'bg-green-500/10 text-green-600 dark:text-green-400' 
-                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
-                    }`}>
-                      {isValid ? 'Valid JSON' : 'Invalid'}
-                    </span>
-                  )}
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleClear}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Clear
-                </motion.button>
-              </div>
-              <InputArea
-                value={input}
-                onChange={handleInputChange}
-                placeholder="Paste your JSON here..."
-                rows={15}
-              />
-            </div>
-          </SectionCard>
-
-          {/* Output Section */}
-          <SectionCard 
-            title="Formatted Output" 
-            icon={<Wand2 className="h-5 w-5" />}
-            delay={0.2}
-          >
-            <OutputArea 
-              label="Result"
-              copyValue={output}
-              actions={
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleDownload}
-                  disabled={!output}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  Download
-                </motion.button>
-              }
+        {/* Statistics Section - Below */}
+        <AnimatePresence>
+          {stats && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ delay: 0.4 }}
             >
-              {output ? (
-                <SyntaxHighlightedJSON json={output} />
-              ) : (
-                <div className="flex h-full min-h-[300px] items-center justify-center text-muted-foreground">
-                  <span className="text-sm">Output will appear here</span>
-                </div>
-              )}
-            </OutputArea>
-          </SectionCard>
-        </div>
-
-        {/* Action Buttons */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex flex-wrap gap-3"
-        >
-          <ActionButton 
-            onClick={formatJSON} 
-            variant="primary"
-            icon={<AlignLeft className="h-4 w-4" />}
-            disabled={!input}
-          >
-            Format / Prettify
-          </ActionButton>
-          <ActionButton 
-            onClick={minifyJSON} 
-            variant="secondary"
-            icon={<Minimize2 className="h-4 w-4" />}
-            disabled={!input}
-          >
-            Minify
-          </ActionButton>
-        </motion.div>
-
-        {/* Tips Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="rounded-2xl border bg-muted/30 p-6"
-        >
-          <h4 className="mb-3 font-semibold">Quick Tips</h4>
-          <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Paste JSON to automatically validate and format
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Use "Minify" to compress JSON for transmission
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Upload JSON files directly from your computer
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Download formatted JSON for later use
-            </li>
-          </ul>
-        </motion.div>
-      </div>
-    </ToolLayout>
+              <div className="mb-4 flex items-center gap-2">
+                <Hash className="h-5 w-5 text-muted-foreground" />
+                <h2 className="text-lg font-semibold">JSON Statistics</h2>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-3">
+                <StatCard label="Size" value={stats.size} icon={FileCode} delay={0} />
+                <StatCard label="Lines" value={stats.lines} icon={AlignLeft} delay={0.05} />
+                <StatCard label="Keys" value={stats.keys} icon={Hash} delay={0.1} />
+                <StatCard label="Objects" value={stats.objects} icon={Braces} delay={0.15} />
+                <StatCard label="Arrays" value={stats.arrays} icon={Layers} delay={0.2} />
+                <StatCard label="Strings" value={stats.strings} icon={Type} delay={0.25} />
+                <StatCard label="Numbers" value={stats.numbers} icon={Hash} delay={0.3} />
+                <StatCard label="Booleans" value={stats.booleans} icon={Check} delay={0.35} />
+                <StatCard label="Nulls" value={stats.nulls} icon={Code2} delay={0.4} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+    </div>
   );
 }
