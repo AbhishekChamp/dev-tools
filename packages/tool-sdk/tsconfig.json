@@ -16,7 +16,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
       "@dev-tools/theme": ["../theme/src"],
       "@dev-tools/ui": ["../ui/src"],

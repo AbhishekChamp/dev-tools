@@ -369,6 +369,7 @@ export default function JSONFormatter() {
   const [error, setError] = useState<string>('');
   const [stats, setStats] = useState<JSONStats | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isMinified, setIsMinified] = useState(false);
   const outputRef = useRef<HTMLDivElement>(null);
 
   // Load sample JSON on mount
@@ -428,6 +429,7 @@ export default function JSONFormatter() {
       const parsed = JSON.parse(input);
       const formatted = JSON.stringify(parsed, null, 2);
       setOutput(formatted);
+      setIsMinified(false);
       setError('');
       updateStats(formatted);
     } catch (err) {
@@ -442,6 +444,7 @@ export default function JSONFormatter() {
       const minified = JSON.stringify(parsed);
       setOutput(minified);
       setInput(minified);
+      setIsMinified(true);
       setError('');
       updateStats(minified);
     } catch (err) {
@@ -449,6 +452,14 @@ export default function JSONFormatter() {
       setError(message);
     }
   }, [input, updateStats]);
+
+  const toggleFormatMinify = useCallback(() => {
+    if (isMinified) {
+      formatJSON();
+    } else {
+      minifyJSON();
+    }
+  }, [isMinified, formatJSON, minifyJSON]);
 
   const handleClear = useCallback(() => {
     setInput('');
@@ -502,17 +513,17 @@ export default function JSONFormatter() {
   const isValid = isValidJSON(input);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col h-full bg-background">
       {/* Tool Switcher */}
       <ToolSwitcher />
 
-      {/* Clean Header */}
+      {/* Tool Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="border-b bg-card/80 backdrop-blur-xl"
+        className="border-b bg-card shrink-0"
       >
-        <div className="mx-auto max-w-[1920px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">
             <div className="flex items-center gap-4">
               <motion.div
@@ -557,210 +568,204 @@ export default function JSONFormatter() {
         </div>
       </motion.header>
 
-      {/* Main Content - Fixed Height Layout */}
-      <main className="mx-auto max-w-[1920px] px-4 sm:px-6 lg:px-8 py-4">
-        {/* Input/Output Section - Fixed Height */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="grid gap-4 lg:grid-cols-2 mb-6"
-        >
-          {/* Input Panel */}
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto p-4">
+        <div className="mx-auto w-full max-w-[1920px]">
+          {/* Input/Output Grid - Side by Side */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-            className="flex flex-col rounded-2xl border bg-card shadow-sm overflow-hidden"
-            style={{ height: 'calc(50vh - 80px)', minHeight: '300px' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"
           >
-            {/* Input Header */}
-            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Code2 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold">Input</span>
-                {input && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      isValid
-                        ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
-                    }`}
-                  >
-                    {isValid ? 'Valid' : 'Invalid'}
-                  </motion.span>
+            {/* Input Panel */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              className="flex flex-col rounded-2xl border bg-card shadow-sm overflow-hidden"
+              style={{ minHeight: '400px' }}
+            >
+              {/* Input Header */}
+              <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Code2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold">Input</span>
+                  {input && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        isValid
+                          ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                          : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                      }`}
+                    >
+                      {isValid ? 'Valid' : 'Invalid'}
+                    </motion.span>
+                  )}
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleClear}
+                  className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                  title="Clear"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </motion.button>
+              </div>
+
+              {/* Input Area */}
+              <div className="flex-1 relative min-h-0">
+                <textarea
+                  value={input}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="Paste your JSON here..."
+                  className="absolute inset-0 w-full h-full resize-none border-0 bg-transparent p-4 font-mono text-sm focus:outline-none focus:ring-0"
+                  spellCheck={false}
+                />
+              </div>
+            </motion.div>
+
+            {/* Output Panel */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="flex flex-col rounded-2xl border bg-card shadow-sm overflow-hidden"
+              style={{ minHeight: '400px' }}
+            >
+              {/* Output Header */}
+              <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Wand2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold">Formatted Output</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {output && (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleCopy}
+                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                        title="Copy"
+                      >
+                        {copied ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleDownload}
+                        className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
+                        title="Download"
+                      >
+                        <Download className="h-4 w-4" />
+                      </motion.button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Output Area */}
+              <div ref={outputRef} className="flex-1 overflow-auto bg-muted/20 min-h-0">
+                {output ? (
+                  <div className="p-4">
+                    <SyntaxHighlightedJSON json={output} />
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-muted-foreground">
+                    <span className="text-sm">Output will appear here</span>
+                  </div>
                 )}
               </div>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleClear}
-                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
-                title="Clear"
+            </motion.div>
+          </motion.div>
+
+          {/* Action Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap items-center justify-center gap-3 mb-4"
+          >
+            <ActionButton
+              onClick={toggleFormatMinify}
+              variant="primary"
+              icon={isMinified ? AlignLeft : Minimize2}
+              disabled={!input}
+            >
+              {isMinified ? 'Format / Prettify' : 'Minify'}
+            </ActionButton>
+            <ActionButton
+              onClick={handleCopy}
+              variant="outline"
+              icon={copied ? Check : Copy}
+              disabled={!output}
+            >
+              {copied ? 'Copied!' : 'Copy Result'}
+            </ActionButton>
+            <ActionButton
+              onClick={handleDownload}
+              variant="outline"
+              icon={Download}
+              disabled={!output}
+            >
+              Download
+            </ActionButton>
+          </motion.div>
+
+          {/* Error Alert */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4"
               >
-                <Trash2 className="h-4 w-4" />
-              </motion.button>
-            </div>
-
-            {/* Input Area */}
-            <div className="flex-1 relative">
-              <textarea
-                value={input}
-                onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="Paste your JSON here..."
-                className="h-full w-full resize-none border-0 bg-transparent p-4 font-mono text-sm focus:outline-none focus:ring-0"
-                spellCheck={false}
-              />
-            </div>
-          </motion.div>
-
-          {/* Output Panel */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="flex flex-col rounded-2xl border bg-card shadow-sm overflow-hidden"
-            style={{ height: 'calc(50vh - 80px)', minHeight: '300px' }}
-          >
-            {/* Output Header */}
-            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Wand2 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold">Formatted Output</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {output && (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={handleCopy}
-                      className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
-                      title="Copy"
-                    >
-                      {copied ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={handleDownload}
-                      className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted"
-                      title="Download"
-                    >
-                      <Download className="h-4 w-4" />
-                    </motion.button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Output Area */}
-            <div ref={outputRef} className="flex-1 overflow-auto bg-muted/20">
-              {output ? (
-                <div className="p-4">
-                  <SyntaxHighlightedJSON json={output} />
+                <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-600 dark:text-red-400">
+                  <AlertCircle className="h-5 w-5 shrink-0" />
+                  <span className="font-medium">{error}</span>
                 </div>
-              ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground">
-                  <span className="text-sm">Output will appear here</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Statistics Section */}
+          <AnimatePresence>
+            {stats && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="mb-4 flex items-center gap-2">
+                  <Hash className="h-5 w-5 text-muted-foreground" />
+                  <h2 className="text-lg font-semibold">JSON Statistics</h2>
                 </div>
-              )}
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Action Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-6"
-        >
-          <ActionButton
-            onClick={formatJSON}
-            variant="primary"
-            icon={AlignLeft}
-            disabled={!input}
-          >
-            Format / Prettify
-          </ActionButton>
-          <ActionButton
-            onClick={minifyJSON}
-            variant="secondary"
-            icon={Minimize2}
-            disabled={!input}
-          >
-            Minify
-          </ActionButton>
-          <ActionButton
-            onClick={handleCopy}
-            variant="outline"
-            icon={copied ? Check : Copy}
-            disabled={!output}
-          >
-            {copied ? 'Copied!' : 'Copy Result'}
-          </ActionButton>
-          <ActionButton
-            onClick={handleDownload}
-            variant="outline"
-            icon={Download}
-            disabled={!output}
-          >
-            Download
-          </ActionButton>
-        </motion.div>
-
-        {/* Error Alert */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-6"
-            >
-              <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-600 dark:text-red-400">
-                <AlertCircle className="h-5 w-5 shrink-0" />
-                <span className="font-medium">{error}</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Statistics Section - Below */}
-        <AnimatePresence>
-          {stats && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 30 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="mb-4 flex items-center gap-2">
-                <Hash className="h-5 w-5 text-muted-foreground" />
-                <h2 className="text-lg font-semibold">JSON Statistics</h2>
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-3">
-                <StatCard label="Size" value={stats.size} icon={FileCode} delay={0} />
-                <StatCard label="Lines" value={stats.lines} icon={AlignLeft} delay={0.05} />
-                <StatCard label="Keys" value={stats.keys} icon={Hash} delay={0.1} />
-                <StatCard label="Objects" value={stats.objects} icon={Braces} delay={0.15} />
-                <StatCard label="Arrays" value={stats.arrays} icon={Layers} delay={0.2} />
-                <StatCard label="Strings" value={stats.strings} icon={Type} delay={0.25} />
-                <StatCard label="Numbers" value={stats.numbers} icon={Hash} delay={0.3} />
-                <StatCard label="Booleans" value={stats.booleans} icon={Check} delay={0.35} />
-                <StatCard label="Nulls" value={stats.nulls} icon={Code2} delay={0.4} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-3">
+                  <StatCard label="Size" value={stats.size} icon={FileCode} delay={0} />
+                  <StatCard label="Lines" value={stats.lines} icon={AlignLeft} delay={0.05} />
+                  <StatCard label="Keys" value={stats.keys} icon={Hash} delay={0.1} />
+                  <StatCard label="Objects" value={stats.objects} icon={Braces} delay={0.15} />
+                  <StatCard label="Arrays" value={stats.arrays} icon={Layers} delay={0.2} />
+                  <StatCard label="Strings" value={stats.strings} icon={Type} delay={0.25} />
+                  <StatCard label="Numbers" value={stats.numbers} icon={Hash} delay={0.3} />
+                  <StatCard label="Booleans" value={stats.booleans} icon={Check} delay={0.35} />
+                  <StatCard label="Nulls" value={stats.nulls} icon={Code2} delay={0.4} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </main>
     </div>
   );

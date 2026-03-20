@@ -5,6 +5,11 @@ export default {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
     '../../packages/ui/src/**/*.{js,ts,jsx,tsx}',
+    '../json-formatter/src/**/*.{js,ts,jsx,tsx}',
+    '../regex-tester/src/**/*.{js,ts,jsx,tsx}',
+    '../jwt-decoder/src/**/*.{js,ts,jsx,tsx}',
+    '../base64-tool/src/**/*.{js,ts,jsx,tsx}',
+    '../password-generator/src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     container: {

@@ -9,13 +9,11 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
-      <main className="pt-16">
-        <div className="p-4 lg:p-8">
-          <Outlet />
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Outlet />
+      </div>
       {process.env.NODE_ENV === 'development' && <TanStackRouterDevtools />}
     </div>
   );

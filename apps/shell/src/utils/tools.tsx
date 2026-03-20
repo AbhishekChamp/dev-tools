@@ -8,17 +8,12 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-// Import tools directly - aliases in vite.config.ts map these to source files
-// @ts-expect-error - Alias to json-formatter source
-import JsonTool from 'jsonFormatterApp/Tool';
-// @ts-expect-error - Alias to regex-tester source  
-import RegexTool from 'regexTesterApp/Tool';
-// @ts-expect-error - Alias to jwt-decoder source
-import JwtTool from 'jwtDecoderApp/Tool';
-// @ts-expect-error - Alias to base64-tool source
-import Base64ToolComp from 'base64ToolApp/Tool';
-// @ts-expect-error - Alias to password-generator source
-import PasswordTool from 'passwordGeneratorApp/Tool';
+// Import tools directly from source files using relative paths
+import JsonTool from '../../../json-formatter/src/Tool';
+import RegexTool from '../../../regex-tester/src/Tool';
+import JwtTool from '../../../jwt-decoder/src/Tool';
+import Base64ToolComp from '../../../base64-tool/src/Tool';
+import PasswordTool from '../../../password-generator/src/Tool';
 
 const iconMap: Record<string, LucideIcon> = {
   FileJson,
