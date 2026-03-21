@@ -11,7 +11,7 @@ function RootComponent() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col pt-16">
         <Outlet />
       </div>
       {process.env.NODE_ENV === 'development' && <TanStackRouterDevtools />}
