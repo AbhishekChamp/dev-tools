@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
+  fallback?: React.ComponentType<{ error: Error }>;
 }
 
 interface State {
@@ -31,7 +32,13 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.hasError && this.state.error) {
+      const FallbackComponent = this.props.fallback;
+      
+      if (FallbackComponent) {
+        return <FallbackComponent error={this.state.error} />;
+      }
+      
       return (
         <div className="flex min-h-screen items-center justify-center p-4">
           <Card className="max-w-md p-6 text-center">

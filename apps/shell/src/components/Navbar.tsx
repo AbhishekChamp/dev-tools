@@ -10,6 +10,7 @@ import {
   Heart,
   Settings,
   Sparkles,
+  Info,
 } from 'lucide-react';
 import { Button, ThemeToggle } from '@dev-tools/ui';
 import { builtInTools, getIconComponent } from '@/utils/tools';
@@ -303,6 +304,12 @@ export function Navbar() {
               icon={<Settings className="h-4 w-4" />}
               label="Settings"
               isActive={currentPath === '/settings'}
+            />
+            <NavLink
+              to="/about"
+              icon={<Info className="h-4 w-4" />}
+              label="About"
+              isActive={currentPath === '/about'}
             />
           </nav>
 

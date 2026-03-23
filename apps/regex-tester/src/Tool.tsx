@@ -15,23 +15,8 @@ import {
   Hash,
   Target,
   FileCode,
-  Command,
-  X,
-  Home,
-  FileJson,
-  KeyRound,
-  ArrowLeftRight,
-  Lock,
 } from 'lucide-react';
-
-// Tool definitions for Cmd+E switcher
-const tools = [
-  { id: 'json', name: 'JSON Formatter', route: 'http://localhost:3001', icon: FileJson, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  { id: 'regex', name: 'Regex Tester', route: 'http://localhost:3002', icon: Regex, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  { id: 'jwt', name: 'JWT Decoder', route: 'http://localhost:3003', icon: KeyRound, color: 'text-green-500', bg: 'bg-green-500/10' },
-  { id: 'base64', name: 'Base64 Tool', route: 'http://localhost:3004', icon: ArrowLeftRight, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-  { id: 'password', name: 'Password Generator', route: 'http://localhost:3005', icon: Lock, color: 'text-red-500', bg: 'bg-red-500/10' },
-];
+import { useEmbedded } from '@dev-tools/tool-sdk';
 
 interface RegexMatch {
   text: string;
@@ -102,110 +87,6 @@ const FLAGS = [
   { flag: 'y', name: 'Sticky', description: 'Sticky matching' },
 ];
 
-// Cmd+E Switcher Component
-function ToolSwitcher() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
-        e.preventDefault();
-        setIsOpen(prev => !prev);
-      }
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={() => setIsOpen(false)}
-        >
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          />
-          
-          {/* Modal Content */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg"
-          >
-            <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl">
-              <div className="flex items-center justify-between border-b px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Command className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Switch Application</span>
-                </div>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="rounded-lg p-1 text-muted-foreground hover:bg-muted"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="p-2">
-                <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  All Tools
-                </p>
-                {tools.map((tool, index) => {
-                  const Icon = tool.icon;
-                  const isActive = tool.id === 'regex';
-                  return (
-                    <motion.a
-                      key={tool.id}
-                      href={tool.route}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all ${
-                        isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-accent'
-                      }`}
-                    >
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                        isActive ? 'bg-primary-foreground/20' : tool.bg
-                      }`}>
-                        <Icon className={`h-5 w-5 ${isActive ? 'text-primary-foreground' : tool.color}`} />
-                      </div>
-                      <span className="flex-1 font-medium">{tool.name}</span>
-                      {isActive && (
-                        <span className="text-xs opacity-80">Current</span>
-                      )}
-                    </motion.a>
-                  );
-                })}
-              </div>
-              <div className="border-t bg-muted/30 px-4 py-3">
-                <a
-                  href="http://localhost:3000/"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-                >
-                  <Home className="h-4 w-4" />
-                  Back to DevTools Home
-                </a>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 // Animated Stat Card
 function StatCard({ label, value, icon: Icon, delay = 0 }: { 
   label: string; 
@@ -236,7 +117,6 @@ function StatCard({ label, value, icon: Icon, delay = 0 }: {
   );
 }
 
-// Action Button with animation
 // Action Button with animation
 function ActionButton({ 
   children, 
@@ -273,6 +153,7 @@ function ActionButton({
 }
 
 export default function RegexTester() {
+  const { isEmbedded } = useEmbedded();
   const [pattern, setPattern] = useState<string>('');
   const [flags, setFlags] = useState<Set<string>>(new Set(['g']));
   const [testString, setTestString] = useState<string>('');
@@ -415,63 +296,64 @@ export default function RegexTester() {
     ? Math.round((matches.reduce((acc, m) => acc + m.length, 0) / testString.length) * 100)
     : 0;
 
-  return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Tool Switcher */}
-      <ToolSwitcher />
-
-      {/* Tool Header */}
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="border-b bg-card shrink-0"
-      >
-        <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex h-14 items-center justify-between">
-            <div className="flex items-center gap-4">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500 text-white"
-              >
-                <Regex className="h-5 w-5" />
-              </motion.div>
-              <div>
-                <h1 className="text-lg font-bold">Regex Tester</h1>
-                <p className="hidden text-xs text-muted-foreground sm:block">
-                  Test and debug regular expressions
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="hidden text-xs text-muted-foreground md:block">
-                Press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">⌘E</kbd> to switch apps
-              </span>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowExamples(!showExamples)}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-              >
-                <Lightbulb className="h-4 w-4" />
-                <span className="hidden sm:inline">Examples</span>
-                {showExamples ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </motion.button>
+  // Standalone header
+  const StandaloneHeader = () => (
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="border-b bg-card shrink-0"
+    >
+      <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex h-14 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500 text-white"
+            >
+              <Regex className="h-5 w-5" />
+            </motion.div>
+            <div>
+              <h1 className="text-lg font-bold">Regex Tester</h1>
+              <p className="hidden text-xs text-muted-foreground sm:block">
+                Test and debug regular expressions
+              </p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2">
+            <span className="hidden text-xs text-muted-foreground md:block">
+              Press <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">⌘E</kbd> to switch apps
+            </span>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowExamples(!showExamples)}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+            >
+              <Lightbulb className="h-4 w-4" />
+              <span className="hidden sm:inline">Examples</span>
+              {showExamples ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </motion.button>
+          </div>
         </div>
-      </motion.header>
+      </div>
+    </motion.header>
+  );
+
+  return (
+    <div className="flex flex-col h-full bg-background">
+      {!isEmbedded && <StandaloneHeader />}
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto p-4">
         <div className="mx-auto w-full max-w-[1920px]">
-          {/* Examples Panel */}
+          {/* Examples Panel - Always available in embedded mode via button */}
           <AnimatePresence>
             {showExamples && (
               <motion.div
@@ -486,9 +368,17 @@ export default function RegexTester() {
                   animate={{ opacity: 1, y: 0 }}
                   className="rounded-2xl border bg-card p-6 shadow-sm"
                 >
-                  <div className="flex items-center gap-2 mb-4">
-                    <Lightbulb className="h-5 w-5 text-yellow-500" />
-                    <h2 className="text-lg font-semibold">Common Patterns</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-yellow-500" />
+                      <h2 className="text-lg font-semibold">Common Patterns</h2>
+                    </div>
+                    <button
+                      onClick={() => setShowExamples(false)}
+                      className="rounded-lg p-1 text-muted-foreground hover:bg-muted"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {REGEX_EXAMPLES.map((example, index) => (
@@ -516,6 +406,25 @@ export default function RegexTester() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Examples Toggle Button for Embedded Mode */}
+          {isEmbedded && !showExamples && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-4 flex justify-end"
+            >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowExamples(true)}
+                className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+              >
+                <Lightbulb className="h-4 w-4" />
+                <span>Show Examples</span>
+              </motion.button>
+            </motion.div>
+          )}
 
           {/* Main Grid - Side by Side */}
           <motion.div

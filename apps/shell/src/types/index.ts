@@ -39,9 +39,20 @@ export interface FavoritesStore {
   toggleFavorite: (id: string) => void;
 }
 
+export interface RecentToolsStore {
+  recentTools: string[];
+  addRecentTool: (id: string) => void;
+  clearRecentTools: () => void;
+}
+
 export interface SidebarState {
   isOpen: boolean;
   toggle: () => void;
   open: () => void;
   close: () => void;
+}
+
+export interface ToolSettings {
+  theme: 'light' | 'dark' | 'system';
+  defaultOptions: Record<string, unknown>;
 }

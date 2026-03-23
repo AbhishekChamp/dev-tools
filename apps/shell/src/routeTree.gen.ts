@@ -16,6 +16,7 @@ import { Route as rootRoute } from './pages/__root'
 import { Route as SettingsImport } from './pages/settings'
 import { Route as IndexImport } from './pages/index'
 import { Route as FavoritesImport } from './pages/favorites'
+import { Route as AboutImport } from './pages/about'
 import { Route as ToolIdImport } from './pages/$toolId'
 
 // Create/Update Routes
@@ -37,6 +38,11 @@ const FavoritesRoute = FavoritesImport.update({
 
 const ToolIdRoute = ToolIdImport.update({
   path: '/$toolId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AboutRoute = AboutImport.update({
+  path: '/about',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -65,6 +71,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutImport
+      parentRoute: typeof rootRoute
+    }
     '/$toolId': {
       id: '/$toolId'
       path: '/$toolId'
@@ -81,6 +94,7 @@ export const routeTree = rootRoute.addChildren({
   IndexRoute,
   FavoritesRoute,
   SettingsRoute,
+  AboutRoute,
   ToolIdRoute,
 })
 
