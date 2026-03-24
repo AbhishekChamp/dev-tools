@@ -26,19 +26,19 @@
     "@dev-tools/theme": "workspace:*",
     "@dev-tools/ui": "workspace:*",
     "@dev-tools/utils": "workspace:*",
-    "react": "^18.2.0"
+    "react": "^19.2.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.1",
-    "@types/react": "^18.2.43",
+    "@types/react": "^19.0.0",
     "@vitejs/plugin-react": "^4.2.1",
     "jsdom": "^23.0.1",
-    "typescript": "^5.3.3",
+    "typescript": "^5.7.0",
     "vitest": "^1.0.4"
   },
   "peerDependencies": {
-    "react": "^18.0.0"
+    "react": "^19.0.0"
   }
 }
