@@ -1,4 +1,5 @@
-import React, { forwardRef, type HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
+import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
 

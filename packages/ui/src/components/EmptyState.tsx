@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Package } from 'lucide-react';
 import { cn } from '../utils/cn';
@@ -6,8 +6,8 @@ import { cn } from '../utils/cn';
 export interface EmptyStateProps {
   title?: string;
   description?: string;
-  icon?: React.ReactNode;
-  action?: React.ReactNode;
+  icon?: ReactNode;
+  action?: ReactNode;
   className?: string;
 }
 

@@ -1,4 +1,4 @@
-import React, { type HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 import { cn } from '../utils/cn';
 
 export interface BadgeProps extends HTMLAttributes<HTMLDivElement> {

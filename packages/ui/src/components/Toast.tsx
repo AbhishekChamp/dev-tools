@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { cn } from '../utils/cn';
@@ -108,9 +108,6 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   );
 }
 
-// Toast hook
-import { useCallback } from 'react';
-
 let addToastCallback: ((toast: Omit<ToastProps, 'id' | 'onClose'>) => void) | null = null;
 
 export function useToast() {
@@ -140,7 +137,7 @@ export function useToast() {
 }
 
 // Toast Provider
-export function ToastProvider({ children }: { children: React.ReactNode }) {
+export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastProps[]>([]);
 
   const addToast = useCallback((toast: Omit<ToastProps, 'id' | 'onClose'>) => {
@@ -153,7 +150,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Register the callback
-  React.useEffect(() => {
+  useEffect(() => {
     addToastCallback = addToast;
     return () => {
       addToastCallback = null;

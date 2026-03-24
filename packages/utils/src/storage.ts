@@ -53,3 +53,52 @@ export class LocalStorageManager<T> {
 export function createStorage<T>(options: StorageOptions<T>): LocalStorageManager<T> {
   return new LocalStorageManager(options);
 }
+
+// Simple wrapper objects for direct storage access
+export const localStorageWrapper = {
+  getItem: <T>(key: string): T | null => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch {
+      return null;
+    }
+  },
+  setItem: <T>(key: string, value: T): void => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Silently fail
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(key);
+  },
+};
+
+export const sessionStorageWrapper = {
+  getItem: <T>(key: string): T | null => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const item = sessionStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch {
+      return null;
+    }
+  },
+  setItem: <T>(key: string, value: T): void => {
+    if (typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Silently fail
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === 'undefined') return;
+    sessionStorage.removeItem(key);
+  },
+};

@@ -1,4 +1,4 @@
-import React, { type HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
 

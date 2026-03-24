@@ -1,9 +1,9 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
 
 interface AnimatedCardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   onClick?: () => void;
   hover?: boolean;
@@ -57,7 +57,7 @@ export function AnimatedCard({
 interface AppCardProps {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   onClick?: () => void;
   delay?: number;
 }
@@ -139,7 +139,7 @@ export function AppCard({ title, description, icon, onClick, delay = 0 }: AppCar
 interface StatCardProps {
   label: string;
   value: string | number;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   trend?: 'up' | 'down' | 'neutral';
   trendValue?: string;
   delay?: number;
