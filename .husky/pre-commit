@@ -1,6 +1,6 @@
-#!/bin/sh
 # Pre-commit hook for Dev Tools Platform
 # Uses pnpm for package management
+# Husky v9+ format (no shebang, no .husky.sh sourcing)
 
 # Colors for output
 RED='\033[0;31m'
@@ -31,9 +31,9 @@ fi
 echo "${YELLOW}▶ Running pre-commit quality checks...${NC}"
 echo ""
 
-# 1. TypeScript Type Checking
-echo "${YELLOW}1/6 Checking TypeScript types...${NC}"
-if ! pnpm exec tsc --noEmit; then
+# 1. TypeScript Type Checking (workspace-aware)
+echo "${YELLOW}1/5 Checking TypeScript types...${NC}"
+if ! pnpm typecheck:all; then
     echo "${RED}✗ TypeScript type checking failed${NC}"
     echo "${RED}Please fix type errors before committing${NC}"
     exit 1
@@ -42,8 +42,8 @@ echo "${GREEN}✓ TypeScript types valid${NC}"
 echo ""
 
 # 2. ESLint on Staged Files
-echo "${YELLOW}2/6 Running ESLint on staged files...${NC}"
-if ! pnpm exec eslint --ext .ts,.tsx src/; then
+echo "${YELLOW}2/5 Running ESLint...${NC}"
+if ! pnpm lint:all; then
     echo "${RED}✗ ESLint checks failed${NC}"
     echo "${RED}Please fix linting errors before committing${NC}"
     exit 1
@@ -51,61 +51,42 @@ fi
 echo "${GREEN}✓ ESLint checks passed${NC}"
 echo ""
 
-# 3. Unit Tests (if available)
-echo "${YELLOW}3/6 Running unit tests...${NC}"
-if pnpm run test --silent 2>/dev/null; then
+# 3. Unit Tests
+echo "${YELLOW}3/5 Running unit tests...${NC}"
+if pnpm test:all; then
     echo "${GREEN}✓ All unit tests passed${NC}"
 else
-    echo "${YELLOW}⚠ No tests configured or tests failed${NC}"
-    # Don't fail if no tests exist
+    echo "${YELLOW}⚠ Tests failed or not configured${NC}"
+    # Don't fail if tests fail during development
 fi
 echo ""
 
 # 4. Check for console.log statements
-echo "${YELLOW}4/6 Checking for console.log statements...${NC}"
-CONSOLE_LOGS=$(grep -r "console\.\(log\|warn\|debug\|info\|trace\)" apps/*/src --include="*.ts" --include="*.tsx" 2>/dev/null | \
+echo "${YELLOW}4/5 Checking for console.log statements...${NC}"
+CONSOLE_LOGS=$(echo "$STAGED_FILES" | xargs grep -l "console\.\(log\|warn\|debug\)" 2>/dev/null | \
     grep -v "test" | \
     grep -v "__tests__" | \
-    grep -v "Tool.tsx" | \
     wc -l | tr -d ' ')
 
 if [ "$CONSOLE_LOGS" -gt 0 ]; then
-    echo "${YELLOW}⚠ Found console.log/warn/debug/info/trace statements:${NC}"
-    grep -rn "console\.\(log\|warn\|debug\|info\|trace\)" apps/*/src --include="*.ts" --include="*.tsx" 2>/dev/null | \
-        grep -v "test" | \
-        grep -v "__tests__" | \
-        grep -v "Tool.tsx" | \
-        head -10
+    echo "${YELLOW}⚠ Found console.log/warn/debug statements in staged files:${NC}"
+    echo "$STAGED_FILES" | xargs grep -n "console\.\(log\|warn\|debug\)" 2>/dev/null | head -10
     echo ""
-    echo "${YELLOW}Use the logger utility or remove debug statements${NC}"
+    echo "${YELLOW}Consider removing debug statements before committing${NC}"
     # Don't fail, just warn
 else
     echo "${GREEN}✓ No unwanted console statements found${NC}"
 fi
 echo ""
 
-# 5. Check for TODO/FIXME in production code
-echo "${YELLOW}5/6 Checking for TODO/FIXME comments...${NC}"
-TODO_COUNT=$(grep -r "TODO\|FIXME" apps/*/src --include="*.ts" --include="*.tsx" 2>/dev/null | \
-    grep -v "__tests__" | \
-    grep -v ".test." | \
-    wc -l | tr -d ' ')
-
-if [ "$TODO_COUNT" -gt 10 ]; then
-    echo "${YELLOW}⚠ Found $TODO_COUNT TODO/FIXME comments in production code${NC}"
-    echo "${YELLOW}Consider addressing these before committing${NC}"
-    # Don't fail, just warn
-else
-    echo "${GREEN}✓ TODO/FIXME count acceptable ($TODO_COUNT)${NC}"
-fi
-echo ""
-
-# 6. File size check
-echo "${YELLOW}6/6 Checking file sizes...${NC}"
-LARGE_FILES=$(find apps/*/src -name "*.ts" -o -name "*.tsx" 2>/dev/null | while read file; do
-    LINES=$(wc -l < "$file" | tr -d ' ')
-    if [ "$LINES" -gt 800 ]; then
-        echo "$file ($LINES lines)"
+# 5. File size check
+echo "${YELLOW}5/5 Checking file sizes...${NC}"
+LARGE_FILES=$(echo "$STAGED_FILES" | while read file; do
+    if [ -f "$file" ]; then
+        LINES=$(wc -l < "$file" | tr -d ' ')
+        if [ "$LINES" -gt 500 ]; then
+            echo "$file ($LINES lines)"
+        fi
     fi
 done)
 

@@ -31,7 +31,7 @@
     "test:ui": "pnpm --filter @dev-tools/ui test:run",
     "test:utils": "pnpm --filter @dev-tools/utils test:run",
     "ci": "pnpm lint:all &&pnpm typecheck:all && pnpm test:all",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
