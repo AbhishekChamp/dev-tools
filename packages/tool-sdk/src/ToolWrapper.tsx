@@ -42,6 +42,7 @@ export function ToolWrapper({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function withToolWrapper<P extends object>(
   Component: React.ComponentType<P>,
   metadata: ToolMetadata

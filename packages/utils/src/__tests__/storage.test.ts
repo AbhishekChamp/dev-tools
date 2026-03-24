@@ -3,23 +3,21 @@ import { localStorageWrapper, sessionStorageWrapper } from '../storage';
 
 describe('localStorageWrapper', () => {
   beforeEach(() => {
-    localStorage.clear = vi.fn();
-    localStorage.getItem = vi.fn();
-    localStorage.setItem = vi.fn();
-    localStorage.removeItem = vi.fn();
+    localStorage.clear();
   });
 
   it('should get item from localStorage', () => {
-    localStorage.getItem = vi.fn().mockReturnValue(JSON.stringify({ test: 'value' }));
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(JSON.stringify({ test: 'value' }));
     
     const result = localStorageWrapper.getItem('key');
     
-    expect(localStorage.getItem).toHaveBeenCalledWith('key');
+    expect(spy).toHaveBeenCalledWith('key');
     expect(result).toEqual({ test: 'value' });
+    spy.mockRestore();
   });
 
   it('should return null when item not found', () => {
-    localStorage.getItem = vi.fn().mockReturnValue(null);
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
     
     const result = localStorageWrapper.getItem('key');
     
@@ -27,22 +25,25 @@ describe('localStorageWrapper', () => {
   });
 
   it('should set item in localStorage', () => {
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+    
     localStorageWrapper.setItem('key', { test: 'value' });
     
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      'key',
-      JSON.stringify({ test: 'value' })
-    );
+    expect(spy).toHaveBeenCalledWith('key', JSON.stringify({ test: 'value' }));
+    spy.mockRestore();
   });
 
   it('should remove item from localStorage', () => {
+    const spy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+    
     localStorageWrapper.removeItem('key');
     
-    expect(localStorage.removeItem).toHaveBeenCalledWith('key');
+    expect(spy).toHaveBeenCalledWith('key');
+    spy.mockRestore();
   });
 
   it('should handle JSON parse errors gracefully', () => {
-    localStorage.getItem = vi.fn().mockReturnValue('invalid json');
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('invalid json');
     
     const result = localStorageWrapper.getItem('key');
     
@@ -52,33 +53,34 @@ describe('localStorageWrapper', () => {
 
 describe('sessionStorageWrapper', () => {
   beforeEach(() => {
-    sessionStorage.clear = vi.fn();
-    sessionStorage.getItem = vi.fn();
-    sessionStorage.setItem = vi.fn();
-    sessionStorage.removeItem = vi.fn();
+    sessionStorage.clear();
   });
 
   it('should get item from sessionStorage', () => {
-    sessionStorage.getItem = vi.fn().mockReturnValue(JSON.stringify({ test: 'value' }));
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(JSON.stringify({ test: 'value' }));
     
     const result = sessionStorageWrapper.getItem('key');
     
-    expect(sessionStorage.getItem).toHaveBeenCalledWith('key');
+    expect(spy).toHaveBeenCalledWith('key');
     expect(result).toEqual({ test: 'value' });
+    spy.mockRestore();
   });
 
   it('should set item in sessionStorage', () => {
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+    
     sessionStorageWrapper.setItem('key', { test: 'value' });
     
-    expect(sessionStorage.setItem).toHaveBeenCalledWith(
-      'key',
-      JSON.stringify({ test: 'value' })
-    );
+    expect(spy).toHaveBeenCalledWith('key', JSON.stringify({ test: 'value' }));
+    spy.mockRestore();
   });
 
   it('should remove item from sessionStorage', () => {
+    const spy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+    
     sessionStorageWrapper.removeItem('key');
     
-    expect(sessionStorage.removeItem).toHaveBeenCalledWith('key');
+    expect(spy).toHaveBeenCalledWith('key');
+    spy.mockRestore();
   });
 });

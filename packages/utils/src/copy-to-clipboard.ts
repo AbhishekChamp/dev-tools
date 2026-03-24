@@ -2,7 +2,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
     return true;
-  } catch (_err) {
+  } catch {
     // Fallback for older browsers
     const textarea = document.createElement('textarea');
     textarea.value = text;

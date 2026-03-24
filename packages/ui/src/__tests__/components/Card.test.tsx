@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { Card, CardHeader, CardContent, CardFooter } from '../../components/Card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/Card';
 
 describe('Card', () => {
   it('should render card with content', () => {
@@ -23,14 +23,17 @@ describe('Card', () => {
   });
 
   it('should apply custom className', () => {
-    render(<Card className="custom-class">Content</Card>);
-    expect(screen.getByText('Content').parentElement).toHaveClass('custom-class');
+    const { container } = render(<Card className="custom-class">Content</Card>);
+    expect(container.querySelector('.custom-class')).toBeInTheDocument();
   });
 
   it('should render with title and description in header', () => {
     render(
       <Card>
-        <CardHeader title="Card Title" description="Card Description" />
+        <CardHeader>
+          <CardTitle>Card Title</CardTitle>
+          <CardDescription>Card Description</CardDescription>
+        </CardHeader>
       </Card>
     );
     

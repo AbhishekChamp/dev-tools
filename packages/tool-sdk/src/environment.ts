@@ -210,5 +210,6 @@ export function useParentMessage<T = unknown>(
     
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }

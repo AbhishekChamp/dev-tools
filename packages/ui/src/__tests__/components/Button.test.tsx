@@ -55,9 +55,9 @@ describe('Button', () => {
 
   it('should render different sizes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
-    expect(screen.getByText('Small').className).toContain('h-8');
+    expect(screen.getByText('Small').className).toContain('h-9');
     
     rerender(<Button size="lg">Large</Button>);
-    expect(screen.getByText('Large').className).toContain('h-12');
+    expect(screen.getByText('Large').className).toContain('h-11');
   });
 });

@@ -110,6 +110,7 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
 
 let addToastCallback: ((toast: Omit<ToastProps, 'id' | 'onClose'>) => void) | null = null;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   const show = useCallback((toast: Omit<ToastProps, 'id' | 'onClose'>) => {
     if (addToastCallback) {
@@ -140,14 +141,14 @@ export function useToast() {
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastProps[]>([]);
 
-  const addToast = useCallback((toast: Omit<ToastProps, 'id' | 'onClose'>) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { ...toast, id, onClose: removeToast }]);
-  }, []);
-
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  const addToast = useCallback((toast: Omit<ToastProps, 'id' | 'onClose'>) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { ...toast, id, onClose: removeToast }]);
+  }, [removeToast]);
 
   // Register the callback
   useEffect(() => {

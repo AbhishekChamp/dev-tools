@@ -85,7 +85,8 @@ describe('tools utilities', () => {
     it('should return icon component for valid icon name', () => {
       const Icon = getIconComponent('FileJson');
       expect(Icon).toBeDefined();
-      expect(typeof Icon).toBe('function');
+      // Component can be function or object (forwardRef)
+      expect(typeof Icon === 'function' || typeof Icon === 'object').toBe(true);
     });
 
     it('should return default icon for invalid icon name', () => {
