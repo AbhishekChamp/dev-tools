@@ -1,4 +1,3 @@
-import type { JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme, type Theme } from '@dev-tools/theme';

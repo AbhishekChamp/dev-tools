@@ -106,7 +106,7 @@ export function useToolConfig<T extends Record<string, unknown>>(config: T): T {
 
 // Tool analytics hook (placeholder - can be connected to analytics service)
 export function useToolAnalytics() {
-  const trackEvent = useCallback((event: string, data?: Record<string, unknown>) => {
+  const trackEvent = useCallback((_event: string, _data?: Record<string, unknown>) => {
     // Placeholder for analytics tracking
     // console.log('[Analytics]', event, data);
   }, []);

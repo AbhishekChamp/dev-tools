@@ -114,7 +114,6 @@ export function filterTools(
 
 export async function loadRemoteTool(entry: string): Promise<Tool | null> {
   try {
-    // @ts-expect-error - Module Federation runtime
     const module = await import(/* @vite-ignore */ entry);
     if (module.default) {
       return {

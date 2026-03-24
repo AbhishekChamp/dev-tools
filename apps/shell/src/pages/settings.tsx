@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { Settings2, Trash2, Palette, Database, Info } from 'lucide-react';

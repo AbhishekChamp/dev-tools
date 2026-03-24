@@ -11,6 +11,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, hover = false, glow = false, children, ...props }, ref) => {
     return (
+      // @ts-expect-error - framer-motion type incompatibility with React 19
       <motion.div
         ref={ref}
         className={cn(

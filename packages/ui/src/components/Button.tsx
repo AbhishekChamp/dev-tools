@@ -43,6 +43,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     return (
+      // @ts-expect-error - framer-motion type incompatibility with React 19
       <motion.button
         ref={ref}
         className={cn(

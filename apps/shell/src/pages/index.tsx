@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { Wrench, Sparkles, Zap, Shield } from 'lucide-react';
@@ -28,7 +28,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 };
@@ -36,7 +36,7 @@ const itemVariants = {
 function HomePage() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] =
-    React.useState<ToolCategory>('all');
+    useState<ToolCategory>('all');
 
   const filteredTools = filterTools(builtInTools, '', selectedCategory);
 

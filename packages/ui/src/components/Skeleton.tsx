@@ -8,6 +8,7 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 
 function Skeleton({ className, pulse = true, ...props }: SkeletonProps) {
   return (
+    // @ts-expect-error - framer-motion type incompatibility with React 19
     <motion.div
       className={cn(
         'rounded-md bg-muted',

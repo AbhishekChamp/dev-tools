@@ -9,7 +9,7 @@ export interface Tool {
   category: ToolCategory;
   tags: string[];
   remote?: string;
-  component?: LazyExoticComponent<ComponentType>;
+  component?: ComponentType<Record<string, unknown>> | LazyExoticComponent<ComponentType<Record<string, unknown>>>;
 }
 
 export type ToolCategory =

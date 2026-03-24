@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, 
   ChevronDown, 
   Wrench,
   FileJson,
@@ -10,10 +9,9 @@ import {
   ArrowLeftRight,
   Lock,
   Home,
-  ExternalLink,
   Command
 } from 'lucide-react';
-import { Link, useRouter } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 
 // Tool definitions for navigation
 const tools = [

@@ -11,7 +11,7 @@ export interface ToolWrapperProps {
 
 export function ToolWrapper({
   children,
-  metadata,
+  metadata: _metadata,
   isLoading = false,
 }: ToolWrapperProps) {
   if (isLoading) {
