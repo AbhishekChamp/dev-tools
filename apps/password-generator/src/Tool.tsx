@@ -313,7 +313,7 @@ export default function PasswordGenerator() {
                 {history.map((item, index) => {
                   const itemStrength = getStrengthInfo(item.strength);
                   return (
-                    <motion.div key={item.timestamp} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }} className="flex items-center gap-3 rounded-xl border bg-card p-3">
+                    <motion.div key={`${item.timestamp}-${index}`} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }} className="flex items-center gap-3 rounded-xl border bg-card p-3">
                       <button onClick={() => setPassword(item.password)} className="flex-1 font-mono text-sm truncate text-left hover:text-primary transition-colors">{item.password}</button>
                       <span className={`text-xs ${itemStrength.color}`}>{itemStrength.label}</span>
                       <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigator.clipboard.writeText(item.password)} className="rounded-lg p-2 text-muted-foreground hover:bg-muted">
