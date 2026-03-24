@@ -11,7 +11,7 @@ import {
   Zap,
   Shield,
   Globe,
-  Github,
+  GitHub,
   ExternalLink,
   Cpu,
   Palette,
@@ -142,7 +142,7 @@ function AboutPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-xl border-2 border-input bg-background px-6 py-3 text-sm font-semibold transition-colors hover:bg-accent"
           >
-            <Github className="h-4 w-4" />
+            <GitHub className="h-4 w-4" />
             View on GitHub
           </a>
         </div>
@@ -338,7 +338,7 @@ function AboutPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary transition-all hover:opacity-90"
             >
-              <Github className="h-4 w-4" />
+              <GitHub className="h-4 w-4" />
               View on GitHub
             </a>
             <Link
