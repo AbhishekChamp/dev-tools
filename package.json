@@ -50,7 +50,7 @@
     "globals": "^15.0.0",
     "husky": "^9.0.0",
     "kill-port": "^2.0.1",
-    "lucide-react": "^1.0.1",
+    "lucide-react": "^0.577.0",
     "prettier": "^3.1.1",
     "prettier-plugin-tailwindcss": "^0.5.9",
     "tailwindcss": "^4.1.0",
