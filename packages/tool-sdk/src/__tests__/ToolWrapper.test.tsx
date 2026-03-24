@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ToolWrapper, ToolErrorBoundary, ToolSuspense } from '../ToolWrapper';
+import { ToolWrapper, ToolErrorBoundary } from '../ToolWrapper';
 import React, { Suspense } from 'react';
 
 describe('ToolWrapper', () => {

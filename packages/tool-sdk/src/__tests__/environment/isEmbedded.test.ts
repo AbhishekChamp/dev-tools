@@ -17,7 +17,7 @@ describe('isEmbedded', () => {
   describe('URL param detection', () => {
     it('should return true when embed=true in URL', () => {
       const originalLocation = window.location;
-      // @ts-ignore
+      // @ts-expect-error - deleting for test mocking
       delete window.location;
       window.location = { search: '?embed=true' } as Location;
       
@@ -28,7 +28,7 @@ describe('isEmbedded', () => {
 
     it('should return false when embed is not true', () => {
       const originalLocation = window.location;
-      // @ts-ignore
+      // @ts-expect-error - deleting for test mocking
       delete window.location;
       window.location = { search: '?embed=false' } as Location;
       
@@ -57,7 +57,7 @@ describe('isEmbedded', () => {
 describe('getEnvironment', () => {
   it('should return embedded when isEmbedded is true', () => {
     const originalLocation = window.location;
-    // @ts-ignore
+    // @ts-expect-error - deleting for test mocking
     delete window.location;
     window.location = { search: '?embed=true' } as Location;
     
@@ -68,7 +68,7 @@ describe('getEnvironment', () => {
 
   it('should return standalone when isEmbedded is false', () => {
     const originalLocation = window.location;
-    // @ts-ignore
+    // @ts-expect-error - deleting for test mocking
     delete window.location;
     window.location = { search: '' } as Location;
     

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { getToolByRoute } from '@/utils/tools';

@@ -43,7 +43,7 @@ function ActionButton({ children, onClick, variant = 'primary', icon, disabled =
   };
 
   return (
-    <motion.button whileHover={disabled ? {} : { scale: 1.02 }} whileTap={disabled ? {} : { scale: 0.98 }} onClick={onClick} disabled={disabled} className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none ${variants[variant]}`}>
+    <motion.button whileHover={disabled ? {} : { scale: 1.02 }} whileTap={disabled ? {} : { scale: 0.98 }} onClick={onClick} disabled={disabled} className={`inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap ${variants[variant]}`}>
       {icon}{children}
     </motion.button>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   KeyRound,
@@ -7,7 +7,7 @@ import {
   AlertCircle,
   Trash2,
   Shield,
-  Clock,
+
   Fingerprint,
   FileJson,
   Lock,
@@ -62,41 +62,6 @@ function StatCard({ label, value, icon: Icon, delay = 0 }: {
   );
 }
 
-// Action Button
-function ActionButton({ 
-  children, 
-  onClick, 
-  variant = 'primary',
-  icon,
-  disabled = false
-}: { 
-  children: React.ReactNode; 
-  onClick?: () => void; 
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  icon?: React.ReactNode;
-  disabled?: boolean;
-}) {
-  const variants = {
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25',
-    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
-    outline: 'border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground',
-    ghost: 'hover:bg-accent hover:text-accent-foreground',
-  };
-
-  return (
-    <motion.button
-      whileHover={disabled ? {} : { scale: 1.02 }}
-      whileTap={disabled ? {} : { scale: 0.98 }}
-      onClick={onClick}
-      disabled={disabled}
-      className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none ${variants[variant]}`}
-    >
-      {icon}
-      {children}
-    </motion.button>
-  );
-}
-
 export default function JWTDecoder() {
   const { isEmbedded } = useEmbedded();
   const [token, setToken] = useState<string>('');
@@ -132,11 +97,6 @@ export default function JWTDecoder() {
   const isExpired = (exp?: number): boolean => {
     if (!exp) return false;
     return Date.now() >= exp * 1000;
-  };
-
-  const formatDate = (timestamp?: number): string => {
-    if (!timestamp) return 'N/A';
-    return new Date(timestamp * 1000).toLocaleString();
   };
 
   const copyToClipboard = async (text: string, section: string) => {

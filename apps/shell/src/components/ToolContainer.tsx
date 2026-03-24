@@ -1,6 +1,6 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import type { Tool } from '@/types';
 
@@ -52,7 +52,7 @@ export function ToolContainer({ tool, children }: ToolContainerProps) {
       >
         <div className="flex items-center gap-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <tool.iconComponent className="h-5 w-5" />
+            <span className="text-lg font-bold">{tool.name.charAt(0)}</span>
           </div>
           <div>
             <h1 className="text-xl font-bold">{tool.name}</h1>

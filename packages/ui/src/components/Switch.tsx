@@ -2,8 +2,7 @@ import type { InputHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
 import { cn } from '../utils/cn';
 
-export interface SwitchProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {}
+export type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>;
 
 const Switch = forwardRef<HTMLInputElement, SwitchProps>(
   ({ className, ...props }, ref) => {

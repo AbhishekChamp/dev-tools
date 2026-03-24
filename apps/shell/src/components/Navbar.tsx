@@ -12,7 +12,7 @@ import {
   Sparkles,
   Info,
 } from 'lucide-react';
-import { Button, ThemeToggle } from '@dev-tools/ui';
+import { ThemeToggle } from '@dev-tools/ui';
 import { builtInTools, getIconComponent } from '@/utils/tools';
 import { cn } from '@/utils/cn';
 

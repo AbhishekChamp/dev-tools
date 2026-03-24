@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { createFileRoute, notFound, Link } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, Loader2, ChevronRight, Home, Heart } from 'lucide-react';
-import { getToolByRoute, getIconComponent, builtInTools } from '@/utils/tools';
+import { AlertCircle, Loader2, Home, Heart } from 'lucide-react';
+import { getToolByRoute, getIconComponent } from '@/utils/tools';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { useFavorites } from '@/stores/favorites';
@@ -102,10 +102,10 @@ function ToolPage() {
   const { toolId } = Route.useParams();
   const tool = getToolByRoute(`/${toolId}`);
   const IconComponent = tool ? getIconComponent(tool.icon) : () => null;
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Track recent tool access
-  React.useEffect(() => {
+  useEffect(() => {
     if (tool) {
       const recent = JSON.parse(localStorage.getItem('dev-tools-recent') || '[]');
       const updated = [tool.id, ...recent.filter((id: string) => id !== tool.id)].slice(0, 5);
@@ -114,7 +114,7 @@ function ToolPage() {
   }, [tool]);
 
   // Set embedded context when tool changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (tool && typeof window !== 'undefined') {
       const context = {
         isEmbedded: true,

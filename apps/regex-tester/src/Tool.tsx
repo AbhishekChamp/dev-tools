@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Regex,
@@ -144,7 +144,7 @@ function ActionButton({
       whileTap={disabled ? {} : { scale: 0.98 }}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none ${variants[variant]}`}
+      className={`inline-flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold transition-all disabled:opacity-50 disabled:pointer-events-none ${variants[variant]}`}
     >
       {icon}
       {children}
@@ -172,9 +172,9 @@ export default function RegexTester() {
     });
   }, []);
 
-  const { regex, error, matches } = useMemo(() => {
+  const { error, matches } = useMemo(() => {
     if (!pattern) {
-      return { regex: null, error: null, matches: [] };
+      return { error: null, matches: [] };
     }
 
     try {
@@ -209,10 +209,9 @@ export default function RegexTester() {
         }
       }
 
-      return { regex, error: null, matches };
+      return { error: null, matches };
     } catch (err) {
       return {
-        regex: null,
         error: err instanceof Error ? err.message : 'Invalid regex',
         matches: [],
       };

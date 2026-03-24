@@ -9,7 +9,6 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
@@ -18,10 +17,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
     "paths": {
-      "@dev-tools/theme": ["../theme/src"],
-      "@dev-tools/ui": ["../ui/src"],
-      "@dev-tools/utils": ["../utils/src"]
+      "@dev-tools/theme": ["../theme/src/index.ts"],
+      "@dev-tools/ui": ["../ui/src/index.ts"],
+      "@dev-tools/utils": ["../utils/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

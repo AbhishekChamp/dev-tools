@@ -1,13 +1,8 @@
-import * as React from 'react';
+
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import {
   Wrench,
-  FileJson,
-  Regex,
-  KeyRound,
-  ArrowLeftRight,
-  Lock,
   Zap,
   Shield,
   Globe,
@@ -182,7 +177,7 @@ function AboutPage() {
               title: 'Extensible',
               description: 'Easy to add new tools. Just create a new micro-frontend and register it.',
             },
-          ].map((feature, index) => (
+          ].map((feature) => (
             <motion.div
               key={feature.title}
               variants={itemVariants}
@@ -208,7 +203,7 @@ function AboutPage() {
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {tools.map((tool, index) => {
+          {tools.map((tool) => {
             const Icon = getIconComponent(builtInTools.find(t => t.id === tool.id)?.icon || 'Wrench');
             return (
               <motion.div
@@ -305,7 +300,7 @@ function AboutPage() {
           <p className="mt-2 text-muted-foreground">Built with modern, battle-tested technologies</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {techStack.map((tech, index) => (
+          {techStack.map((tech) => (
             <motion.div
               key={tech.name}
               variants={itemVariants}
