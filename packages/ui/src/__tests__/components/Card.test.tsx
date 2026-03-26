@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/Card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../../components/Card';
 
 describe('Card', () => {
   it('should render card with content', () => {
@@ -16,7 +23,7 @@ describe('Card', () => {
         <CardFooter>Footer</CardFooter>
       </Card>
     );
-    
+
     expect(screen.getByText('Header')).toBeInTheDocument();
     expect(screen.getByText('Content')).toBeInTheDocument();
     expect(screen.getByText('Footer')).toBeInTheDocument();
@@ -36,7 +43,7 @@ describe('Card', () => {
         </CardHeader>
       </Card>
     );
-    
+
     expect(screen.getByText('Card Title')).toBeInTheDocument();
     expect(screen.getByText('Card Description')).toBeInTheDocument();
   });

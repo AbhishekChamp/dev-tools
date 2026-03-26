@@ -23,7 +23,7 @@ export function isEmbedded(): boolean {
   // Check for embed query param
   const params = new URLSearchParams(window.location.search);
   if (params.get('embed') === 'true') return true;
-  
+
   // Check if running in iframe
   try {
     if (window.self !== window.top) return true;
@@ -31,13 +31,13 @@ export function isEmbedded(): boolean {
     // If we can't access window.top due to cross-origin, we're in an iframe
     return true;
   }
-  
+
   // Check for parent window (different from self)
   if (window.parent !== window) return true;
-  
+
   // Check for data attribute on body (set by shell)
   if (document.body.dataset.embedded === 'true') return true;
-  
+
   // Check for stored embedded context (set by shell when loading tool)
   const stored = sessionStorage.getItem(EMBEDDED_CONTEXT_KEY);
   if (stored) {
@@ -48,7 +48,7 @@ export function isEmbedded(): boolean {
       // Ignore parse errors
     }
   }
-  
+
   return false;
 }
 
@@ -71,7 +71,7 @@ export function getEmbeddedContext(): EmbeddedContext {
       // Fall through to default
     }
   }
-  
+
   return {
     isEmbedded: isEmbedded(),
     parentOrigin: typeof window !== 'undefined' ? window.location.origin : null,
@@ -84,7 +84,7 @@ export function getEmbeddedContext(): EmbeddedContext {
  */
 export function setEmbeddedContext(context: Partial<EmbeddedContext>): void {
   if (typeof window === 'undefined') return;
-  
+
   const current = getEmbeddedContext();
   const updated = { ...current, ...context, isEmbedded: true };
   sessionStorage.setItem(EMBEDDED_CONTEXT_KEY, JSON.stringify(updated));
@@ -103,15 +103,15 @@ export function clearEmbeddedContext(): void {
  */
 export function useEnvironment(): Environment {
   const [environment, setEnvironment] = useState<Environment>(getEnvironment);
-  
+
   useEffect(() => {
     // Listen for embedded context changes
     const handleStorage = () => {
       setEnvironment(getEnvironment());
     };
-    
+
     window.addEventListener('storage', handleStorage);
-    
+
     // Also check periodically for query param changes
     const interval = setInterval(() => {
       const current = getEnvironment();
@@ -119,13 +119,13 @@ export function useEnvironment(): Environment {
         setEnvironment(current);
       }
     }, 1000);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorage);
       clearInterval(interval);
     };
   }, [environment]);
-  
+
   return environment;
 }
 
@@ -137,12 +137,12 @@ export function useEmbeddedContext(): EmbeddedContext & {
   clearContext: () => void;
 } {
   const [context, setContextState] = useState<EmbeddedContext>(getEmbeddedContext);
-  
+
   const setContext = useCallback((ctx: Partial<EmbeddedContext>) => {
     setEmbeddedContext(ctx);
     setContextState(getEmbeddedContext());
   }, []);
-  
+
   const clearContext = useCallback(() => {
     clearEmbeddedContext();
     setContextState({
@@ -151,12 +151,12 @@ export function useEmbeddedContext(): EmbeddedContext & {
       toolId: null,
     });
   }, []);
-  
+
   useEffect(() => {
     // Update context on mount
     setContextState(getEmbeddedContext());
   }, []);
-  
+
   return { ...context, setContext, clearContext };
 }
 
@@ -171,7 +171,7 @@ export function useEmbedded(): {
 } {
   const environment = useEnvironment();
   const context = useEmbeddedContext();
-  
+
   return {
     isEmbedded: environment === 'embedded',
     isStandalone: environment === 'standalone',
@@ -188,7 +188,7 @@ export function useEmbedded(): {
  */
 export function postToParent(message: unknown, targetOrigin = '*'): void {
   if (typeof window === 'undefined' || window.parent === window) return;
-  
+
   try {
     window.parent.postMessage(message, targetOrigin);
   } catch {
@@ -207,9 +207,9 @@ export function useParentMessage<T = unknown>(
     const handleMessage = (event: MessageEvent) => {
       handler(event.data as T);
     };
-    
+
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }

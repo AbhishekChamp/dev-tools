@@ -26,13 +26,11 @@ function ToolContainer({
       className={cn('w-full', className)}
     >
       <Card className="overflow-hidden">
-        <CardHeader className="border-b bg-muted/50">
+        <CardHeader className="bg-muted/50 border-b">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl">{title}</CardTitle>
-              {description && (
-                <CardDescription className="mt-1">{description}</CardDescription>
-              )}
+              {description && <CardDescription className="mt-1">{description}</CardDescription>}
             </div>
             {headerAction && <div>{headerAction}</div>}
           </div>

@@ -25,15 +25,15 @@ function EmptyState({
       transition={{ duration: 0.3 }}
       className={cn(
         'flex flex-col items-center justify-center rounded-lg border border-dashed',
-        'p-8 text-center animate-in fade-in-50',
+        'animate-in fade-in-50 p-8 text-center',
         className
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-        {icon || <Package className="h-6 w-6 text-muted-foreground" />}
+      <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+        {icon || <Package className="text-muted-foreground h-6 w-6" />}
       </div>
       <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-      <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+      <p className="text-muted-foreground mt-2 text-sm">{description}</p>
       {action && <div className="mt-6">{action}</div>}
     </motion.div>
   );

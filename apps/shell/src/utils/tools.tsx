@@ -1,12 +1,5 @@
 import type { Tool } from '@/types';
-import {
-  FileJson,
-  Regex,
-  KeyRound,
-  ArrowLeftRight,
-  Lock,
-  type LucideIcon,
-} from 'lucide-react';
+import { FileJson, Regex, KeyRound, ArrowLeftRight, Lock, type LucideIcon } from 'lucide-react';
 
 // Import tools directly from source files using relative paths
 import JsonTool from '../../../json-formatter/src/Tool';
@@ -93,11 +86,7 @@ export function getToolById(id: string): Tool | undefined {
   return builtInTools.find((tool) => tool.id === id);
 }
 
-export function filterTools(
-  tools: Tool[],
-  query: string,
-  category?: string
-): Tool[] {
+export function filterTools(tools: Tool[], query: string, category?: string): Tool[] {
   return tools.filter((tool) => {
     const matchesQuery =
       !query ||
@@ -105,8 +94,7 @@ export function filterTools(
       tool.description.toLowerCase().includes(query.toLowerCase()) ||
       tool.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()));
 
-    const matchesCategory =
-      !category || category === 'all' || tool.category === category;
+    const matchesCategory = !category || category === 'all' || tool.category === category;
 
     return matchesQuery && matchesCategory;
   });

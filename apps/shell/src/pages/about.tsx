@@ -1,4 +1,3 @@
-
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import {
@@ -41,7 +40,8 @@ const tools = [
     id: 'json-formatter',
     route: '/json',
     name: 'JSON Formatter',
-    description: 'Format, validate, and beautify JSON data with syntax highlighting and statistics.',
+    description:
+      'Format, validate, and beautify JSON data with syntax highlighting and statistics.',
     features: ['Syntax highlighting', 'Format/Minify toggle', 'File upload', 'Statistics'],
     color: 'bg-blue-500',
     iconColor: 'text-blue-500',
@@ -82,7 +82,12 @@ const tools = [
     route: '/password',
     name: 'Password Generator',
     description: 'Generate secure, random passwords with customizable options and strength meter.',
-    features: ['Strength meter', 'Customizable options', 'Password history', 'Cryptographically secure'],
+    features: [
+      'Strength meter',
+      'Customizable options',
+      'Password history',
+      'Cryptographically secure',
+    ],
     color: 'bg-red-500',
     iconColor: 'text-red-500',
     bgColor: 'bg-red-500/10',
@@ -112,21 +117,21 @@ function AboutPage() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-primary-foreground"
+          className="bg-primary text-primary-foreground mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl"
         >
           <Wrench className="h-10 w-10" />
         </motion.div>
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
           DevTools Platform
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          A collection of powerful developer utilities built with modern micro-frontend architecture. 
-          All tools run locally in your browser for maximum privacy and speed.
+        <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg">
+          A collection of powerful developer utilities built with modern micro-frontend
+          architecture. All tools run locally in your browser for maximum privacy and speed.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+            className="bg-primary text-primary-foreground shadow-primary/25 hover:shadow-primary/30 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold shadow-lg transition-all hover:shadow-xl"
           >
             <Zap className="h-4 w-4" />
             Explore Tools
@@ -135,7 +140,7 @@ function AboutPage() {
             href="https://github.com/AbhishekChamp/dev-tools"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border-2 border-input bg-background px-6 py-3 text-sm font-semibold transition-colors hover:bg-accent"
+            className="border-input bg-background hover:bg-accent inline-flex items-center gap-2 rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-colors"
           >
             <Github className="h-4 w-4" />
             View on GitHub
@@ -150,12 +155,14 @@ function AboutPage() {
             {
               icon: Shield,
               title: 'Privacy First',
-              description: 'All processing happens locally in your browser. No data is ever sent to any server.',
+              description:
+                'All processing happens locally in your browser. No data is ever sent to any server.',
             },
             {
               icon: Zap,
               title: 'Lightning Fast',
-              description: 'Built with Vite for instant startup and hot module replacement during development.',
+              description:
+                'Built with Vite for instant startup and hot module replacement during development.',
             },
             {
               icon: Globe,
@@ -165,7 +172,8 @@ function AboutPage() {
             {
               icon: Cpu,
               title: 'Micro-Frontend Architecture',
-              description: 'Each tool is an independent application that can be developed and deployed separately.',
+              description:
+                'Each tool is an independent application that can be developed and deployed separately.',
             },
             {
               icon: Palette,
@@ -175,20 +183,21 @@ function AboutPage() {
             {
               icon: Layers,
               title: 'Extensible',
-              description: 'Easy to add new tools. Just create a new micro-frontend and register it.',
+              description:
+                'Easy to add new tools. Just create a new micro-frontend and register it.',
             },
           ].map((feature) => (
             <motion.div
               key={feature.title}
               variants={itemVariants}
               whileHover={{ y: -4 }}
-              className="rounded-2xl border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
+              className="bg-card rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md"
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="bg-primary/10 text-primary mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
                 <feature.icon className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold">{feature.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{feature.description}</p>
+              <p className="text-muted-foreground mt-2 text-sm">{feature.description}</p>
             </motion.div>
           ))}
         </div>
@@ -198,28 +207,35 @@ function AboutPage() {
       <motion.section variants={itemVariants}>
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold">Available Tools</h2>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             {tools.length} powerful utilities at your fingertips
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => {
-            const Icon = getIconComponent(builtInTools.find(t => t.id === tool.id)?.icon || 'Wrench');
+            const Icon = getIconComponent(
+              builtInTools.find((t) => t.id === tool.id)?.icon || 'Wrench'
+            );
             return (
               <motion.div
                 key={tool.id}
                 variants={itemVariants}
                 whileHover={{ y: -4 }}
-                className="group rounded-2xl border bg-card p-6 shadow-sm transition-all hover:shadow-lg"
+                className="bg-card group rounded-2xl border p-6 shadow-sm transition-all hover:shadow-lg"
               >
-                <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${tool.bgColor}`}>
+                <div
+                  className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${tool.bgColor}`}
+                >
                   <Icon className={`h-6 w-6 ${tool.iconColor}`} />
                 </div>
                 <h3 className="text-xl font-semibold">{tool.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{tool.description}</p>
+                <p className="text-muted-foreground mt-2 text-sm">{tool.description}</p>
                 <ul className="mt-4 space-y-1">
                   {tool.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <li
+                      key={feature}
+                      className="text-muted-foreground flex items-center gap-2 text-sm"
+                    >
                       <div className={`h-1.5 w-1.5 rounded-full ${tool.color}`} />
                       {feature}
                     </li>
@@ -239,13 +255,13 @@ function AboutPage() {
       </motion.section>
 
       {/* Architecture Section */}
-      <motion.section variants={itemVariants} className="rounded-3xl bg-muted/50 p-8 lg:p-12">
+      <motion.section variants={itemVariants} className="bg-muted/50 rounded-3xl p-8 lg:p-12">
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
           <div>
             <h2 className="text-3xl font-bold">How It Works</h2>
-            <p className="mt-4 text-muted-foreground">
-              DevTools Platform uses Module Federation to compose multiple independent applications 
-              into a unified experience. Each tool is a standalone micro-frontend that can be 
+            <p className="text-muted-foreground mt-4">
+              DevTools Platform uses Module Federation to compose multiple independent applications
+              into a unified experience. Each tool is a standalone micro-frontend that can be
               developed, tested, and deployed independently.
             </p>
             <div className="mt-6 space-y-4">
@@ -256,7 +272,7 @@ function AboutPage() {
                 'Independent deployments without coordination',
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                  <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
                     {i + 1}
                   </div>
                   <span className="text-sm">{item}</span>
@@ -264,26 +280,32 @@ function AboutPage() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border bg-card p-6">
+          <div className="bg-card rounded-2xl border p-6">
             <h3 className="mb-4 text-lg font-semibold">Architecture Diagram</h3>
             <div className="space-y-3">
-              <div className="rounded-xl border bg-primary/5 p-4">
+              <div className="bg-primary/5 rounded-xl border p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-lg">
                     <Layers className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="font-medium">Shell Application</p>
-                    <p className="text-xs text-muted-foreground">Host / Router / Navigation</p>
+                    <p className="text-muted-foreground text-xs">Host / Router / Navigation</p>
                   </div>
                 </div>
               </div>
               <div className="flex justify-center">
-                <div className="h-8 w-px bg-border" />
+                <div className="bg-border h-8 w-px" />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {['JSON Formatter', 'Regex Tester', 'JWT Decoder', 'Base64 Tool', 'Password Generator'].map((tool) => (
-                  <div key={tool} className="rounded-xl border bg-card p-3 text-center text-sm">
+                {[
+                  'JSON Formatter',
+                  'Regex Tester',
+                  'JWT Decoder',
+                  'Base64 Tool',
+                  'Password Generator',
+                ].map((tool) => (
+                  <div key={tool} className="bg-card rounded-xl border p-3 text-center text-sm">
                     {tool}
                   </div>
                 ))}
@@ -297,21 +319,23 @@ function AboutPage() {
       <motion.section variants={itemVariants}>
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold">Technology Stack</h2>
-          <p className="mt-2 text-muted-foreground">Built with modern, battle-tested technologies</p>
+          <p className="text-muted-foreground mt-2">
+            Built with modern, battle-tested technologies
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {techStack.map((tech) => (
             <motion.div
               key={tech.name}
               variants={itemVariants}
-              className="flex items-center gap-4 rounded-xl border bg-card p-4"
+              className="bg-card flex items-center gap-4 rounded-xl border p-4"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
                 <tech.icon className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium">{tech.name}</p>
-                <p className="text-xs text-muted-foreground">{tech.description}</p>
+                <p className="text-muted-foreground text-xs">{tech.description}</p>
               </div>
             </motion.div>
           ))}
@@ -319,26 +343,29 @@ function AboutPage() {
       </motion.section>
 
       {/* Contributing Section */}
-      <motion.section variants={itemVariants} className="rounded-3xl bg-primary p-8 text-primary-foreground lg:p-12">
+      <motion.section
+        variants={itemVariants}
+        className="bg-primary text-primary-foreground rounded-3xl p-8 lg:p-12"
+      >
         <div className="text-center">
           <h2 className="text-3xl font-bold">Contributing</h2>
           <p className="mx-auto mt-4 max-w-2xl opacity-90">
-            DevTools Platform is open source. Contributions are welcome! 
-            Whether you want to add a new tool, fix a bug, or improve documentation.
+            DevTools Platform is open source. Contributions are welcome! Whether you want to add a
+            new tool, fix a bug, or improve documentation.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <a
               href="https://github.com/AbhishekChamp/dev-tools"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary transition-all hover:opacity-90"
+              className="bg-primary-foreground text-primary inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all hover:opacity-90"
             >
               <Github className="h-4 w-4" />
               View on GitHub
             </a>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-primary-foreground/20 px-6 py-3 text-sm font-semibold transition-all hover:bg-primary-foreground/10"
+              className="border-primary-foreground/20 hover:bg-primary-foreground/10 inline-flex items-center gap-2 rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-all"
             >
               <Wrench className="h-4 w-4" />
               Start Using Tools
@@ -349,12 +376,10 @@ function AboutPage() {
 
       {/* Footer */}
       <motion.footer variants={itemVariants} className="border-t pt-8 text-center">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           © 2026 DevTools Platform. Built with ❤️ for developers.
         </p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Version 1.0.0 • MIT License
-        </p>
+        <p className="text-muted-foreground mt-2 text-xs">Version 1.0.0 • MIT License</p>
       </motion.footer>
     </motion.div>
   );

@@ -4,12 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 export { useState, useCallback, useEffect };
 
 // Re-export environment hooks
-export {
-  useEnvironment,
-  useEmbeddedContext,
-  useEmbedded,
-  useParentMessage,
-} from './environment';
+export { useEnvironment, useEmbeddedContext, useEmbedded, useParentMessage } from './environment';
 
 export function useToolState<T>(
   key: string,
@@ -17,7 +12,7 @@ export function useToolState<T>(
 ): [T, (value: T | ((prev: T) => T)) => void] {
   const [state, setState] = useState<T>(() => {
     if (typeof window === 'undefined') return initialValue;
-    
+
     try {
       const stored = sessionStorage.getItem(`tool:${key}`);
       return stored ? JSON.parse(stored) : initialValue;
@@ -30,7 +25,7 @@ export function useToolState<T>(
     (value: T | ((prev: T) => T)) => {
       setState((prev) => {
         const newValue = value instanceof Function ? value(prev) : value;
-        
+
         if (typeof window !== 'undefined') {
           try {
             sessionStorage.setItem(`tool:${key}`, JSON.stringify(newValue));
@@ -38,7 +33,7 @@ export function useToolState<T>(
             // Ignore storage errors
           }
         }
-        
+
         return newValue;
       });
     },
@@ -48,10 +43,7 @@ export function useToolState<T>(
   return [state, setValue];
 }
 
-export function useAsyncTool<T>(
-  asyncFunction: () => Promise<T>,
-  immediate = false
-) {
+export function useAsyncTool<T>(asyncFunction: () => Promise<T>, immediate = false) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -59,7 +51,7 @@ export function useAsyncTool<T>(
   const execute = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await asyncFunction();
       setData(result);
@@ -130,22 +122,25 @@ export function useRecentTools(maxItems = 5): {
     }
   });
 
-  const addRecentTool = useCallback((toolId: string) => {
-    setRecentTools((prev) => {
-      const filtered = prev.filter((id) => id !== toolId);
-      const updated = [toolId, ...filtered].slice(0, maxItems);
-      
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('dev-tools-recent', JSON.stringify(updated));
-        } catch {
-          // Ignore storage errors
+  const addRecentTool = useCallback(
+    (toolId: string) => {
+      setRecentTools((prev) => {
+        const filtered = prev.filter((id) => id !== toolId);
+        const updated = [toolId, ...filtered].slice(0, maxItems);
+
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('dev-tools-recent', JSON.stringify(updated));
+          } catch {
+            // Ignore storage errors
+          }
         }
-      }
-      
-      return updated;
-    });
-  }, [maxItems]);
+
+        return updated;
+      });
+    },
+    [maxItems]
+  );
 
   const clearRecentTools = useCallback(() => {
     setRecentTools([]);
@@ -167,7 +162,7 @@ export function useToolSettings<T extends Record<string, unknown>>(
   defaults: T
 ): [T, (settings: Partial<T>) => void, () => void] {
   const storageKey = `tool-settings:${toolId}`;
-  
+
   const [settings, setSettingsState] = useState<T>(() => {
     if (typeof window === 'undefined') return defaults;
     try {
@@ -178,21 +173,24 @@ export function useToolSettings<T extends Record<string, unknown>>(
     }
   });
 
-  const setSettings = useCallback((newSettings: Partial<T>) => {
-    setSettingsState((prev) => {
-      const updated = { ...prev, ...newSettings };
-      
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(updated));
-        } catch {
-          // Ignore storage errors
+  const setSettings = useCallback(
+    (newSettings: Partial<T>) => {
+      setSettingsState((prev) => {
+        const updated = { ...prev, ...newSettings };
+
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(updated));
+          } catch {
+            // Ignore storage errors
+          }
         }
-      }
-      
-      return updated;
-    });
-  }, [storageKey]);
+
+        return updated;
+      });
+    },
+    [storageKey]
+  );
 
   const resetSettings = useCallback(() => {
     setSettingsState(defaults);

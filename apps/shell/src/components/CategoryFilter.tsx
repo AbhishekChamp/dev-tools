@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { cn } from '@/utils/cn';
 import type { ToolCategory } from '@/types';
@@ -18,11 +17,7 @@ interface CategoryFilterProps {
   className?: string;
 }
 
-export function CategoryFilter({
-  value,
-  onChange,
-  className,
-}: CategoryFilterProps) {
+export function CategoryFilter({ value, onChange, className }: CategoryFilterProps) {
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       {categories.map((category) => (
@@ -31,7 +26,7 @@ export function CategoryFilter({
           onClick={() => onChange(category.value)}
           className={cn(
             'relative rounded-full px-4 py-2 text-sm font-medium transition-colors',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2',
             value === category.value
               ? 'text-primary-foreground'
               : 'text-muted-foreground hover:text-foreground hover:bg-accent'
@@ -40,7 +35,7 @@ export function CategoryFilter({
           {value === category.value && (
             <motion.div
               layoutId="activeCategory"
-              className="absolute inset-0 rounded-full bg-primary"
+              className="bg-primary absolute inset-0 rounded-full"
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
             />
           )}

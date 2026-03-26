@@ -7,34 +7,25 @@ interface ToastOptions {
 }
 
 export function useToast() {
-  const success = useCallback(
-    (message: string, options?: ToastOptions) => {
-      toast.success(message, {
-        duration: options?.duration ?? 3000,
-        icon: options?.icon,
-      });
-    },
-    []
-  );
+  const success = useCallback((message: string, options?: ToastOptions) => {
+    toast.success(message, {
+      duration: options?.duration ?? 3000,
+      icon: options?.icon,
+    });
+  }, []);
 
-  const error = useCallback(
-    (message: string, options?: ToastOptions) => {
-      toast.error(message, {
-        duration: options?.duration ?? 4000,
-        icon: options?.icon,
-      });
-    },
-    []
-  );
+  const error = useCallback((message: string, options?: ToastOptions) => {
+    toast.error(message, {
+      duration: options?.duration ?? 4000,
+      icon: options?.icon,
+    });
+  }, []);
 
-  const loading = useCallback(
-    (message: string, options?: ToastOptions) => {
-      return toast.loading(message, {
-        duration: options?.duration ?? Infinity,
-      });
-    },
-    []
-  );
+  const loading = useCallback((message: string, options?: ToastOptions) => {
+    return toast.loading(message, {
+      duration: options?.duration ?? Infinity,
+    });
+  }, []);
 
   const dismiss = useCallback((toastId?: string) => {
     if (toastId) {
@@ -45,7 +36,7 @@ export function useToast() {
   }, []);
 
   const promise = useCallback(
-    <T,>(
+    <T>(
       promise: Promise<T>,
       messages: {
         loading: string;

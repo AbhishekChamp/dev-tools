@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  getToolByRoute, 
-  getToolById, 
-  filterTools, 
+import {
+  getToolByRoute,
+  getToolById,
+  filterTools,
   getIconComponent,
-  builtInTools 
+  builtInTools,
 } from '@/utils/tools';
 
 describe('tools utilities', () => {
@@ -66,12 +66,12 @@ describe('tools utilities', () => {
 
     it('should filter by category', () => {
       const results = filterTools(builtInTools, '', 'encoder');
-      expect(results.every(t => t.category === 'encoder')).toBe(true);
+      expect(results.every((t) => t.category === 'encoder')).toBe(true);
     });
 
     it('should combine query and category filters', () => {
       const results = filterTools(builtInTools, 'decode', 'encoder');
-      expect(results.every(t => t.category === 'encoder')).toBe(true);
+      expect(results.every((t) => t.category === 'encoder')).toBe(true);
     });
 
     it('should be case insensitive', () => {

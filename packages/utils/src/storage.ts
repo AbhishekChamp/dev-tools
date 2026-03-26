@@ -20,7 +20,7 @@ export class LocalStorageManager<T> {
 
   get(): T {
     if (typeof window === 'undefined') return this.defaultValue;
-    
+
     try {
       const item = localStorage.getItem(this.key);
       return item ? this.deserializer(item) : this.defaultValue;
@@ -31,7 +31,7 @@ export class LocalStorageManager<T> {
 
   set(value: T): void {
     if (typeof window === 'undefined') return;
-    
+
     try {
       localStorage.setItem(this.key, this.serializer(value));
     } catch {

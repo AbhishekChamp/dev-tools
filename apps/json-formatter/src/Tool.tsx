@@ -245,7 +245,7 @@ function ActionButton({
       whileTap={disabled ? {} : { scale: 0.98 }}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap ${variants[variant]}`}
+      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-6 py-2.5 text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 ${variants[variant]}`}
     >
       {Icon && <Icon className="h-4 w-4" />}
       {children}

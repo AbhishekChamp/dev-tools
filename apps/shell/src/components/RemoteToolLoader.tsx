@@ -10,11 +10,9 @@ export function RemoteToolLoader() {
   if (!tool) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+        <AlertCircle className="text-muted-foreground mx-auto h-12 w-12" />
         <h2 className="mt-4 text-lg font-semibold">Tool not found</h2>
-        <p className="text-muted-foreground">
-          The requested tool could not be found.
-        </p>
+        <p className="text-muted-foreground">The requested tool could not be found.</p>
       </div>
     );
   }
@@ -22,11 +20,9 @@ export function RemoteToolLoader() {
   if (!tool.component) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+        <AlertCircle className="text-muted-foreground mx-auto h-12 w-12" />
         <h2 className="mt-4 text-lg font-semibold">Tool not available</h2>
-        <p className="text-muted-foreground">
-          This tool is not currently loaded.
-        </p>
+        <p className="text-muted-foreground">This tool is not currently loaded.</p>
       </div>
     );
   }
@@ -37,7 +33,7 @@ export function RemoteToolLoader() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
         </div>
       }
     >

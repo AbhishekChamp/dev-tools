@@ -39,14 +39,14 @@ export function AnimatedCard({
       whileTap={onClick ? { scale: 0.98 } : undefined}
       onClick={onClick}
       className={cn(
-        'relative overflow-hidden rounded-xl border bg-card p-6 shadow-sm',
+        'bg-card relative overflow-hidden rounded-xl border p-6 shadow-sm',
         hover && 'cursor-pointer transition-shadow duration-300 hover:shadow-lg',
         glow && 'glow-effect dark:glow-effect-dark',
         className
       )}
     >
       {glow && (
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="from-primary/5 absolute inset-0 bg-gradient-to-br via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       )}
       <div className="relative z-10">{children}</div>
     </motion.div>
@@ -81,42 +81,38 @@ export function AppCard({ title, description, icon, onClick, delay = 0 }: AppCar
       onClick={onClick}
       className={cn(
         'group relative cursor-pointer overflow-hidden rounded-2xl',
-        'border bg-card p-8 shadow-sm',
+        'bg-card border p-8 shadow-sm',
         'transition-all duration-300',
-        'hover:shadow-xl hover:border-primary/50'
+        'hover:border-primary/50 hover:shadow-xl'
       )}
     >
       {/* Background gradient on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-      
+      <div className="from-primary/5 to-primary/5 absolute inset-0 bg-gradient-to-br via-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
       {/* Glow effect */}
-      <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/0 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-      
+      <div className="from-primary/20 to-primary/0 absolute -inset-1 rounded-2xl bg-gradient-to-r opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
+
       <div className="relative z-10">
         {/* Icon */}
         <motion.div
           className={cn(
             'mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl',
             'bg-primary/10 text-primary',
-            'transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3'
+            'transition-transform duration-300 group-hover:rotate-3 group-hover:scale-110'
           )}
         >
           {icon}
         </motion.div>
-        
+
         {/* Title */}
-        <h3 className="mb-2 text-xl font-semibold tracking-tight text-card-foreground">
-          {title}
-        </h3>
-        
+        <h3 className="text-card-foreground mb-2 text-xl font-semibold tracking-tight">{title}</h3>
+
         {/* Description */}
-        <p className="text-muted-foreground leading-relaxed">
-          {description}
-        </p>
-        
+        <p className="text-muted-foreground leading-relaxed">{description}</p>
+
         {/* Arrow indicator */}
         <motion.div
-          className="mt-6 flex items-center text-sm font-medium text-primary"
+          className="text-primary mt-6 flex items-center text-sm font-medium"
           initial={{ x: 0, opacity: 0.7 }}
           whileHover={{ x: 4, opacity: 1 }}
         >
@@ -127,7 +123,12 @@ export function AppCard({ title, description, icon, onClick, delay = 0 }: AppCar
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 8l4 4m0 0l-4 4m4-4H3"
+            />
           </svg>
         </motion.div>
       </div>
@@ -157,11 +158,11 @@ export function StatCard({ label, value, icon, trend, trendValue, delay = 0 }: S
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay, ease: 'easeOut' }}
-      className="rounded-xl border bg-card p-6 shadow-sm"
+      className="bg-card rounded-xl border p-6 shadow-sm"
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="text-muted-foreground text-sm font-medium">{label}</p>
           <motion.h4
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -178,11 +179,7 @@ export function StatCard({ label, value, icon, trend, trendValue, delay = 0 }: S
             </p>
           )}
         </div>
-        {icon && (
-          <div className="rounded-lg bg-primary/10 p-3 text-primary">
-            {icon}
-          </div>
-        )}
+        {icon && <div className="bg-primary/10 text-primary rounded-lg p-3">{icon}</div>}
       </div>
     </motion.div>
   );

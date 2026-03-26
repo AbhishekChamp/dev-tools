@@ -11,7 +11,7 @@ describe('Button', () => {
   it('should handle click events', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Click me</Button>);
-    
+
     fireEvent.click(screen.getByText('Click me'));
     expect(handleClick).toHaveBeenCalledOnce();
   });
@@ -47,8 +47,12 @@ describe('Button', () => {
 
   it('should not call onClick when disabled', () => {
     const handleClick = vi.fn();
-    render(<Button disabled onClick={handleClick}>Disabled</Button>);
-    
+    render(
+      <Button disabled onClick={handleClick}>
+        Disabled
+      </Button>
+    );
+
     fireEvent.click(screen.getByText('Disabled'));
     expect(handleClick).not.toHaveBeenCalled();
   });
@@ -56,7 +60,7 @@ describe('Button', () => {
   it('should render different sizes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
     expect(screen.getByText('Small').className).toContain('h-9');
-    
+
     rerender(<Button size="lg">Large</Button>);
     expect(screen.getByText('Large').className).toContain('h-11');
   });

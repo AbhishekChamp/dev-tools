@@ -18,9 +18,9 @@ export function isValidBase64(str: string): boolean {
 export function isValidJWT(token: string): boolean {
   const parts = token.split('.');
   if (parts.length !== 3) return false;
-  
+
   try {
-    parts.forEach(part => atob(part.replace(/-/g, '+').replace(/_/g, '/')));
+    parts.forEach((part) => atob(part.replace(/-/g, '+').replace(/_/g, '/')));
     return true;
   } catch {
     return false;

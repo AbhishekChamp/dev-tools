@@ -11,7 +11,7 @@
 ## Tool SDK
 
 Use @dev-tools/tool-sdk for:
+
 - Tool metadata
 - State management hooks
 - Error boundaries
-

@@ -34,27 +34,22 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError && this.state.error) {
       const FallbackComponent = this.props.fallback;
-      
+
       if (FallbackComponent) {
         return <FallbackComponent error={this.state.error} />;
       }
-      
+
       return (
         <div className="flex min-h-screen items-center justify-center p-4">
           <Card className="max-w-md p-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-              <AlertTriangle className="h-6 w-6 text-destructive" />
+            <div className="bg-destructive/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+              <AlertTriangle className="text-destructive h-6 w-6" />
             </div>
-            <h2 className="mt-4 text-lg font-semibold">
-              Something went wrong
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <h2 className="mt-4 text-lg font-semibold">Something went wrong</h2>
+            <p className="text-muted-foreground mt-2 text-sm">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
-            <Button
-              onClick={this.handleReset}
-              className="mt-6"
-            >
+            <Button onClick={this.handleReset} className="mt-6">
               <RefreshCw className="mr-2 h-4 w-4" />
               Reload Application
             </Button>

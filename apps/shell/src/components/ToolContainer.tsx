@@ -13,15 +13,15 @@ function ToolSkeleton() {
   return (
     <div className="flex h-full flex-col space-y-4 p-6">
       <div className="flex items-center gap-4">
-        <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
+        <div className="bg-muted h-12 w-12 animate-pulse rounded-xl" />
         <div className="space-y-2">
-          <div className="h-6 w-48 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+          <div className="bg-muted h-6 w-48 animate-pulse rounded" />
+          <div className="bg-muted h-4 w-32 animate-pulse rounded" />
         </div>
       </div>
       <div className="flex-1 space-y-4">
-        <div className="h-32 animate-pulse rounded-xl bg-muted" />
-        <div className="h-32 animate-pulse rounded-xl bg-muted" />
+        <div className="bg-muted h-32 animate-pulse rounded-xl" />
+        <div className="bg-muted h-32 animate-pulse rounded-xl" />
       </div>
     </div>
   );
@@ -34,7 +34,7 @@ function ToolError({ error }: { error: Error }) {
         <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
       </div>
       <h3 className="mt-4 text-lg font-semibold">Failed to load tool</h3>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-2 text-sm">
         {error.message || 'An error occurred while loading the tool.'}
       </p>
     </div>
@@ -43,20 +43,20 @@ function ToolError({ error }: { error: Error }) {
 
 export function ToolContainer({ tool, children }: ToolContainerProps) {
   return (
-    <div className="flex h-full flex-col bg-background">
+    <div className="bg-background flex h-full flex-col">
       {/* Tool Header - Shell provides this */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="border-b bg-card px-4 py-4 sm:px-6 lg:px-8"
+        className="bg-card border-b px-4 py-4 sm:px-6 lg:px-8"
       >
         <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-xl">
             <span className="text-lg font-bold">{tool.name.charAt(0)}</span>
           </div>
           <div>
             <h1 className="text-xl font-bold">{tool.name}</h1>
-            <p className="text-sm text-muted-foreground">{tool.description}</p>
+            <p className="text-muted-foreground text-sm">{tool.description}</p>
           </div>
         </div>
       </motion.header>
@@ -64,9 +64,7 @@ export function ToolContainer({ tool, children }: ToolContainerProps) {
       {/* Tool Content */}
       <div className="flex-1 overflow-hidden">
         <ErrorBoundary fallback={ToolError}>
-          <Suspense fallback={<ToolSkeleton />}>
-            {children}
-          </Suspense>
+          <Suspense fallback={<ToolSkeleton />}>{children}</Suspense>
         </ErrorBoundary>
       </div>
     </div>

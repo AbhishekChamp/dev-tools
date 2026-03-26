@@ -35,9 +35,7 @@ function FavoritesPage() {
   const { favorites } = useFavorites();
   const navigate = useNavigate();
 
-  const favoriteTools = builtInTools.filter((tool) =>
-    favorites.includes(tool.id)
-  );
+  const favoriteTools = builtInTools.filter((tool) => favorites.includes(tool.id));
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
@@ -46,11 +44,11 @@ function FavoritesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-500/10 via-red-500/5 to-background border p-8 lg:p-12"
+        className="to-background relative overflow-hidden rounded-3xl border bg-gradient-to-br from-red-500/10 via-red-500/5 p-8 lg:p-12"
       >
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-500/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-red-500/5 blur-3xl" />
-        
+
         <div className="relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -59,9 +57,11 @@ function FavoritesPage() {
             className="mb-6 inline-flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-1.5 text-sm font-medium text-red-600 dark:text-red-400"
           >
             <Heart className="h-4 w-4" />
-            <span>{favoriteTools.length} Favorite{favoriteTools.length !== 1 ? 's' : ''}</span>
+            <span>
+              {favoriteTools.length} Favorite{favoriteTools.length !== 1 ? 's' : ''}
+            </span>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -70,12 +70,12 @@ function FavoritesPage() {
           >
             Your Favorites
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-4 max-w-2xl text-lg text-muted-foreground"
+            className="text-muted-foreground mt-4 max-w-2xl text-lg"
           >
             Quick access to your most-used developer tools
           </motion.p>
@@ -111,11 +111,11 @@ function FavoritesPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center justify-center rounded-3xl border border-dashed p-16 text-center"
         >
-          <div className="rounded-full bg-muted p-6">
-            <Heart className="h-12 w-12 text-muted-foreground" />
+          <div className="bg-muted rounded-full p-6">
+            <Heart className="text-muted-foreground h-12 w-12" />
           </div>
           <h3 className="mt-6 text-xl font-semibold">No favorites yet</h3>
-          <p className="mt-2 max-w-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 max-w-sm">
             Add tools to your favorites by clicking the heart icon on any tool page
           </p>
           <Link to="/">

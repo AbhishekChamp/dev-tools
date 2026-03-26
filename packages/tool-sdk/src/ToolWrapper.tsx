@@ -17,7 +17,7 @@ export function ToolWrapper({
   if (isLoading) {
     return (
       <Card className="w-full">
-        <div className="p-6 space-y-4">
+        <div className="space-y-4 p-6">
           <Skeleton className="h-8 w-1/3" />
           <Skeleton className="h-4 w-2/3" />
           <div className="space-y-2">
@@ -87,11 +87,9 @@ export class ToolErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <Card className="p-6 border-destructive">
-            <h3 className="text-lg font-semibold text-destructive">
-              Something went wrong
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+          <Card className="border-destructive p-6">
+            <h3 className="text-destructive text-lg font-semibold">Something went wrong</h3>
+            <p className="text-muted-foreground mt-2 text-sm">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
           </Card>
@@ -108,7 +106,7 @@ export function ToolSuspense({ children }: { children: ReactNode }) {
     <Suspense
       fallback={
         <Card className="w-full">
-          <div className="p-6 space-y-4">
+          <div className="space-y-4 p-6">
             <Skeleton className="h-8 w-1/3" />
             <Skeleton className="h-4 w-2/3" />
             <div className="space-y-2">

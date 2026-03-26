@@ -47,13 +47,13 @@
 
 ### Developer Tools
 
-| Tool | Description | Category |
-|------|-------------|----------|
-| **JSON Formatter** | Validate, format, and minify JSON with syntax highlighting | Formatter |
-| **Regex Tester** | Test and debug regular expressions with real-time matching | Tester |
-| **JWT Decoder** | Decode and inspect JWT tokens (header, payload, signature) | Encoder |
-| **Base64 Tool** | Encode and decode Base64 strings with URL-safe support | Encoder |
-| **Password Generator** | Generate secure passwords with customizable options | Generator |
+| Tool                   | Description                                                | Category  |
+| ---------------------- | ---------------------------------------------------------- | --------- |
+| **JSON Formatter**     | Validate, format, and minify JSON with syntax highlighting | Formatter |
+| **Regex Tester**       | Test and debug regular expressions with real-time matching | Tester    |
+| **JWT Decoder**        | Decode and inspect JWT tokens (header, payload, signature) | Encoder   |
+| **Base64 Tool**        | Encode and decode Base64 strings with URL-safe support     | Encoder   |
+| **Password Generator** | Generate secure passwords with customizable options        | Generator |
 
 ### Platform Features
 
@@ -80,9 +80,11 @@
 This project follows a **micro-frontend architecture** where each tool is a standalone Vite application that can run in two modes:
 
 ### Embedded Mode
+
 Tools run inside the shell application with shared navigation, breadcrumbs, and consistent styling.
 
 ### Standalone Mode
+
 Tools run independently for focused development and testing.
 
 ```
@@ -142,6 +144,7 @@ pnpm dev
 ```
 
 The development server will start:
+
 - Shell: http://localhost:3000
 - JSON Formatter: http://localhost:3001
 - Regex Tester: http://localhost:3002
@@ -248,12 +251,12 @@ pnpm test:tool-sdk
 
 ### Test Coverage
 
-| Package | Coverage |
-|---------|----------|
-| Shell App | Components, stores, utilities |
-| tool-sdk | Environment detection, hooks |
-| ui | Component variants, states |
-| utils | Validation, formatting, storage |
+| Package   | Coverage                        |
+| --------- | ------------------------------- |
+| Shell App | Components, stores, utilities   |
+| tool-sdk  | Environment detection, hooks    |
+| ui        | Component variants, states      |
+| utils     | Validation, formatting, storage |
 
 ---
 
@@ -261,12 +264,12 @@ pnpm test:tool-sdk
 
 GitHub Actions workflows are configured for automated testing, building, and deployment:
 
-| Workflow | Trigger | Description |
-|----------|---------|-------------|
-| **CI** | PR / Push | Lint, typecheck, and test |
-| **Build** | PR / Push | Verify production builds |
-| **Deploy** | Push to main | Automated deployments |
-| **Release** | Tag push | Version bumping and releases |
+| Workflow    | Trigger      | Description                  |
+| ----------- | ------------ | ---------------------------- |
+| **CI**      | PR / Push    | Lint, typecheck, and test    |
+| **Build**   | PR / Push    | Verify production builds     |
+| **Deploy**  | Push to main | Automated deployments        |
+| **Release** | Tag push     | Version bumping and releases |
 
 ### Workflow Features
 
@@ -299,6 +302,7 @@ Contributions are welcome! Please follow these steps:
 ### Pre-commit Hooks
 
 Husky hooks run automatically on commit:
+
 - TypeScript type checking
 - ESLint validation
 - Unit tests

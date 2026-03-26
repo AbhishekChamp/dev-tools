@@ -31,8 +31,22 @@ fi
 echo "${YELLOW}▶ Running pre-commit quality checks...${NC}"
 echo ""
 
-# 1. TypeScript Type Checking (workspace-aware)
-echo "${YELLOW}1/5 Checking TypeScript types...${NC}"
+# 1. Prettier Format Check (on staged files only)
+echo "${YELLOW}1/6 Checking code formatting...${NC}"
+STAGED_FORMATTABLE=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json|md)$' || true)
+if [ -n "$STAGED_FORMATTABLE" ]; then
+    # Try to auto-fix formatting on staged files
+    echo "$STAGED_FORMATTABLE" | xargs prettier --write --ignore-unknown 2>/dev/null || true
+    # Re-stage the formatted files
+    echo "$STAGED_FORMATTABLE" | xargs git add 2>/dev/null || true
+    echo "${GREEN}✓ Code formatting applied${NC}"
+else
+    echo "${GREEN}✓ No files to format${NC}"
+fi
+echo ""
+
+# 2. TypeScript Type Checking (workspace-aware)
+echo "${YELLOW}2/6 Checking TypeScript types...${NC}"
 if ! pnpm typecheck:all; then
     echo "${RED}✗ TypeScript type checking failed${NC}"
     echo "${RED}Please fix type errors before committing${NC}"
@@ -41,8 +55,8 @@ fi
 echo "${GREEN}✓ TypeScript types valid${NC}"
 echo ""
 
-# 2. ESLint on Staged Files
-echo "${YELLOW}2/5 Running ESLint...${NC}"
+# 3. ESLint on Staged Files
+echo "${YELLOW}3/6 Running ESLint...${NC}"
 if ! pnpm lint:all; then
     echo "${RED}✗ ESLint checks failed${NC}"
     echo "${RED}Please fix linting errors before committing${NC}"
@@ -51,8 +65,8 @@ fi
 echo "${GREEN}✓ ESLint checks passed${NC}"
 echo ""
 
-# 3. Unit Tests
-echo "${YELLOW}3/5 Running unit tests...${NC}"
+# 4. Unit Tests
+echo "${YELLOW}4/6 Running unit tests...${NC}"
 if pnpm test:all; then
     echo "${GREEN}✓ All unit tests passed${NC}"
 else
@@ -61,8 +75,8 @@ else
 fi
 echo ""
 
-# 4. Check for console.log statements
-echo "${YELLOW}4/5 Checking for console.log statements...${NC}"
+# 5. Check for console.log statements
+echo "${YELLOW}5/6 Checking for console.log statements...${NC}"
 CONSOLE_LOGS=$(echo "$STAGED_FILES" | xargs grep -l "console\.\(log\|warn\|debug\)" 2>/dev/null | \
     grep -v "test" | \
     grep -v "__tests__" | \
@@ -79,8 +93,8 @@ else
 fi
 echo ""
 
-# 5. File size check
-echo "${YELLOW}5/5 Checking file sizes...${NC}"
+# 6. File size check
+echo "${YELLOW}6/6 Checking file sizes...${NC}"
 LARGE_FILES=$(echo "$STAGED_FILES" | while read file; do
     if [ -f "$file" ]; then
         LINES=$(wc -l < "$file" | tr -d ' ')

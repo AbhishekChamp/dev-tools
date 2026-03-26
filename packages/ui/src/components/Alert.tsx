@@ -15,7 +15,8 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
         className={cn(
           'relative w-full rounded-lg border p-4',
           variant === 'default' && 'bg-background text-foreground',
-          variant === 'destructive' && 'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
+          variant === 'destructive' &&
+            'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
           className
         )}
         {...props}
@@ -43,11 +44,7 @@ AlertTitle.displayName = 'AlertTitle';
 
 const AlertDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
   ({ className, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('text-sm [&_p]:leading-relaxed', className)}
-      {...props}
-    >
+    <div ref={ref} className={cn('text-sm [&_p]:leading-relaxed', className)} {...props}>
       {children}
     </div>
   )

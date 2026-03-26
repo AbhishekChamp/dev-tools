@@ -14,4 +14,3 @@
    pnpm build
 
 2. Deploy each app independently to Vercel/Netlify.
-

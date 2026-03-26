@@ -34,13 +34,13 @@ export function Toast({ id, type, title, message, duration = 5000, onClose }: To
 
   useEffect(() => {
     if (duration === Infinity) return;
-    
+
     const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
       setProgress(remaining);
-      
+
       if (remaining === 0) {
         clearInterval(interval);
         onClose(id);
@@ -63,21 +63,19 @@ export function Toast({ id, type, title, message, duration = 5000, onClose }: To
       )}
     >
       <div className="flex items-start gap-3">
-        <Icon className="h-5 w-5 shrink-0 mt-0.5" />
-        <div className="flex-1 min-w-0">
-          {title && (
-            <h4 className="font-semibold text-sm">{title}</h4>
-          )}
+        <Icon className="mt-0.5 h-5 w-5 shrink-0" />
+        <div className="min-w-0 flex-1">
+          {title && <h4 className="text-sm font-semibold">{title}</h4>}
           <p className={cn('text-sm', title && 'mt-1')}>{message}</p>
         </div>
         <button
           onClick={() => onClose(id)}
-          className="shrink-0 rounded-md p-1 opacity-70 hover:opacity-100 transition-opacity"
+          className="shrink-0 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100"
         >
           <X className="h-4 w-4" />
         </button>
       </div>
-      
+
       {duration !== Infinity && (
         <motion.div
           className="absolute bottom-0 left-0 h-0.5 bg-current opacity-30"
@@ -118,21 +116,33 @@ export function useToast() {
     }
   }, []);
 
-  const success = useCallback((message: string, title?: string) => {
-    show({ type: 'success', message, title });
-  }, [show]);
+  const success = useCallback(
+    (message: string, title?: string) => {
+      show({ type: 'success', message, title });
+    },
+    [show]
+  );
 
-  const error = useCallback((message: string, title?: string) => {
-    show({ type: 'error', message, title });
-  }, [show]);
+  const error = useCallback(
+    (message: string, title?: string) => {
+      show({ type: 'error', message, title });
+    },
+    [show]
+  );
 
-  const info = useCallback((message: string, title?: string) => {
-    show({ type: 'info', message, title });
-  }, [show]);
+  const info = useCallback(
+    (message: string, title?: string) => {
+      show({ type: 'info', message, title });
+    },
+    [show]
+  );
 
-  const warning = useCallback((message: string, title?: string) => {
-    show({ type: 'warning', message, title });
-  }, [show]);
+  const warning = useCallback(
+    (message: string, title?: string) => {
+      show({ type: 'warning', message, title });
+    },
+    [show]
+  );
 
   return { show, success, error, info, warning };
 }
@@ -145,10 +155,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const addToast = useCallback((toast: Omit<ToastProps, 'id' | 'onClose'>) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { ...toast, id, onClose: removeToast }]);
-  }, [removeToast]);
+  const addToast = useCallback(
+    (toast: Omit<ToastProps, 'id' | 'onClose'>) => {
+      const id = Math.random().toString(36).substring(2, 9);
+      setToasts((prev) => [...prev, { ...toast, id, onClose: removeToast }]);
+    },
+    [removeToast]
+  );
 
   // Register the callback
   useEffect(() => {

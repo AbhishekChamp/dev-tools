@@ -10,11 +10,7 @@ function Skeleton({ className, pulse = true, ...props }: SkeletonProps) {
   return (
     // @ts-expect-error - framer-motion type incompatibility with React 19
     <motion.div
-      className={cn(
-        'rounded-md bg-muted',
-        pulse && 'animate-pulse',
-        className
-      )}
+      className={cn('bg-muted rounded-md', pulse && 'animate-pulse', className)}
       initial={{ opacity: 0.5 }}
       animate={{ opacity: [0.5, 0.8, 0.5] }}
       transition={{

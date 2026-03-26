@@ -9,16 +9,12 @@ export interface Tool {
   category: ToolCategory;
   tags: string[];
   remote?: string;
-  component?: ComponentType<Record<string, unknown>> | LazyExoticComponent<ComponentType<Record<string, unknown>>>;
+  component?:
+    | ComponentType<Record<string, unknown>>
+    | LazyExoticComponent<ComponentType<Record<string, unknown>>>;
 }
 
-export type ToolCategory =
-  | 'all'
-  | 'formatter'
-  | 'encoder'
-  | 'generator'
-  | 'tester'
-  | 'converter';
+export type ToolCategory = 'all' | 'formatter' | 'encoder' | 'generator' | 'tester' | 'converter';
 
 export interface ToolRegistryEntry {
   name: string;

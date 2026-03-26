@@ -1,4 +1,3 @@
-
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import { useTheme } from '@dev-tools/theme';

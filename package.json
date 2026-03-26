@@ -30,7 +30,7 @@
     "test:tool-sdk": "pnpm --filter @dev-tools/tool-sdk test:run",
     "test:ui": "pnpm --filter @dev-tools/ui test:run",
     "test:utils": "pnpm --filter @dev-tools/utils test:run",
-    "ci": "pnpm lint:all &&pnpm typecheck:all && pnpm test:all",
+    "ci": "pnpm format:check && pnpm lint:all && pnpm typecheck:all && pnpm test:all",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -53,6 +53,7 @@
     "lucide-react": "^0.577.0",
     "prettier": "^3.1.1",
     "prettier-plugin-tailwindcss": "^0.5.9",
+    "@vitest/coverage-v8": "^1.0.0",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.0.0",

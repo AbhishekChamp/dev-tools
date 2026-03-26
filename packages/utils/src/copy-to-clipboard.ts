@@ -10,7 +10,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     textarea.style.left = '-9999px';
     document.body.appendChild(textarea);
     textarea.select();
-    
+
     try {
       document.execCommand('copy');
       document.body.removeChild(textarea);

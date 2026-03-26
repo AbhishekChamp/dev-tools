@@ -6,24 +6,26 @@ import React, { Suspense } from 'react';
 describe('ToolWrapper', () => {
   it('should render children when not loading', () => {
     render(
-      <ToolWrapper metadata={{ id: 'test', name: 'Test', version: '1.0.0', category: 'other', tags: [] }}>
+      <ToolWrapper
+        metadata={{ id: 'test', name: 'Test', version: '1.0.0', category: 'other', tags: [] }}
+      >
         <div>Tool Content</div>
       </ToolWrapper>
     );
-    
+
     expect(screen.getByText('Tool Content')).toBeInTheDocument();
   });
 
   it('should render skeleton when loading', () => {
     render(
-      <ToolWrapper 
+      <ToolWrapper
         metadata={{ id: 'test', name: 'Test', version: '1.0.0', category: 'other', tags: [] }}
         isLoading={true}
       >
         <div>Tool Content</div>
       </ToolWrapper>
     );
-    
+
     expect(screen.queryByText('Tool Content')).not.toBeInTheDocument();
   });
 });
@@ -35,13 +37,13 @@ describe('ToolErrorBoundary', () => {
 
   it('should render fallback when error occurs', () => {
     const Fallback = () => <div>Error occurred</div>;
-    
+
     render(
       <ToolErrorBoundary fallback={<Fallback />}>
         <ThrowError />
       </ToolErrorBoundary>
     );
-    
+
     expect(screen.getByText('Error occurred')).toBeInTheDocument();
   });
 
@@ -51,15 +53,13 @@ describe('ToolErrorBoundary', () => {
         <ThrowError />
       </ToolErrorBoundary>
     );
-    
+
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
   });
 });
 
 describe('ToolSuspense', () => {
-  const LazyComponent = React.lazy(() => 
-    Promise.resolve({ default: () => <div>Loaded</div> })
-  );
+  const LazyComponent = React.lazy(() => Promise.resolve({ default: () => <div>Loaded</div> }));
 
   it('should render fallback while loading', () => {
     render(
@@ -67,7 +67,7 @@ describe('ToolSuspense', () => {
         <LazyComponent />
       </Suspense>
     );
-    
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 });

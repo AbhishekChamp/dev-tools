@@ -13,9 +13,7 @@ export const Route = createFileRoute('/$toolId')({
   notFoundComponent: () => (
     <div className="flex flex-col items-center justify-center py-12">
       <h1 className="text-2xl font-bold">Tool not found</h1>
-      <p className="text-muted-foreground">
-        The requested tool could not be found.
-      </p>
+      <p className="text-muted-foreground">The requested tool could not be found.</p>
     </div>
   ),
 });
@@ -25,15 +23,15 @@ function ToolSkeleton() {
   return (
     <div className="flex h-full flex-col space-y-6 p-6">
       <div className="flex items-center gap-4">
-        <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
+        <div className="bg-muted h-12 w-12 animate-pulse rounded-xl" />
         <div className="space-y-2">
-          <div className="h-6 w-48 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-64 animate-pulse rounded bg-muted" />
+          <div className="bg-muted h-6 w-48 animate-pulse rounded" />
+          <div className="bg-muted h-4 w-64 animate-pulse rounded" />
         </div>
       </div>
       <div className="flex-1 space-y-4">
-        <div className="h-48 animate-pulse rounded-xl bg-muted" />
-        <div className="h-48 animate-pulse rounded-xl bg-muted" />
+        <div className="bg-muted h-48 animate-pulse rounded-xl" />
+        <div className="bg-muted h-48 animate-pulse rounded-xl" />
       </div>
     </div>
   );
@@ -47,12 +45,12 @@ function ToolError({ error }: { error: Error }) {
         <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
       </div>
       <h3 className="mt-4 text-lg font-semibold">Failed to load tool</h3>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-2 max-w-md text-sm">
         {error.message || 'An error occurred while loading the tool.'}
       </p>
       <button
         onClick={() => window.location.reload()}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        className="bg-primary text-primary-foreground mt-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium"
       >
         <Loader2 className="h-4 w-4" />
         Try Again
@@ -122,12 +120,12 @@ function ToolPage() {
         toolId: tool.id,
       };
       sessionStorage.setItem('__dev_tools_embedded_context__', JSON.stringify(context));
-      
+
       // Add embed query param without reload
       const url = new URL(window.location.href);
       url.searchParams.set('embed', 'true');
       window.history.replaceState({}, '', url);
-      
+
       // Simulate loading complete after a short delay
       const timer = setTimeout(() => setIsLoading(false), 100);
       return () => clearTimeout(timer);
@@ -140,7 +138,7 @@ function ToolPage() {
 
   // Get the pre-loaded component
   const ToolComponent = tool.component;
-  
+
   if (!ToolComponent) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -150,12 +148,12 @@ function ToolPage() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-background">
+    <div className="bg-background flex h-full flex-col">
       {/* Shell-Provided Tool Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="border-b bg-card"
+        className="bg-card border-b"
       >
         <div className="mx-auto w-full px-4 py-4 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
@@ -175,13 +173,13 @@ function ToolPage() {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground"
+                className="bg-primary text-primary-foreground flex h-12 w-12 items-center justify-center rounded-xl"
               >
                 <IconComponent className="h-6 w-6" />
               </motion.div>
               <div>
                 <h1 className="text-xl font-bold">{tool.name}</h1>
-                <p className="text-sm text-muted-foreground">{tool.description}</p>
+                <p className="text-muted-foreground text-sm">{tool.description}</p>
               </div>
             </div>
 
@@ -192,7 +190,7 @@ function ToolPage() {
       </motion.header>
 
       {/* Tool Content Area */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {isLoading && (
             <motion.div
@@ -200,13 +198,13 @@ function ToolPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-10 bg-background"
+              className="bg-background absolute inset-0 z-10"
             >
               <ToolSkeleton />
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         <ErrorBoundary fallback={ToolError}>
           <PageTransition>
             <div className="h-full overflow-auto">

@@ -42,9 +42,9 @@ describe('isValidJSON', () => {
     const nested = JSON.stringify({
       level1: {
         level2: {
-          level3: 'value'
-        }
-      }
+          level3: 'value',
+        },
+      },
     });
     expect(isValidJSON(nested)).toBe(true);
   });

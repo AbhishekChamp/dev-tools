@@ -21,19 +21,17 @@ function SettingsPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-8"
+        className="from-primary/10 via-primary/5 to-background relative overflow-hidden rounded-2xl border bg-gradient-to-br p-8"
       >
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
-        
+        <div className="bg-primary/10 absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl" />
+
         <div className="relative z-10 flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
+          <div className="bg-primary text-primary-foreground flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg">
             <Settings2 className="h-7 w-7" />
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground">
-              Customize your Dev Tools experience
-            </p>
+            <p className="text-muted-foreground">Customize your Dev Tools experience</p>
           </div>
         </div>
       </motion.div>
@@ -47,16 +45,14 @@ function SettingsPage() {
       >
         {/* Appearance */}
         <Card className="overflow-hidden">
-          <CardHeader className="border-b bg-muted/30 pb-4">
+          <CardHeader className="bg-muted/30 border-b pb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Palette className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Palette className="text-primary h-5 w-5" />
               </div>
               <div>
                 <CardTitle className="text-lg">Appearance</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Customize the look and feel
-                </p>
+                <p className="text-muted-foreground text-sm">Customize the look and feel</p>
               </div>
             </div>
           </CardHeader>
@@ -64,10 +60,16 @@ function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Theme</p>
-                <p className="text-sm text-muted-foreground">
-                  Current: <Badge variant="outline" className="ml-1 capitalize">{theme}</Badge>
-                  {' '}
-                  (Resolved: <Badge variant="outline" className="capitalize">{resolvedTheme}</Badge>)
+                <p className="text-muted-foreground text-sm">
+                  Current:{' '}
+                  <Badge variant="outline" className="ml-1 capitalize">
+                    {theme}
+                  </Badge>{' '}
+                  (Resolved:{' '}
+                  <Badge variant="outline" className="capitalize">
+                    {resolvedTheme}
+                  </Badge>
+                  )
                 </p>
               </div>
               <ThemeToggle />
@@ -77,16 +79,14 @@ function SettingsPage() {
 
         {/* Data */}
         <Card className="overflow-hidden">
-          <CardHeader className="border-b bg-muted/30 pb-4">
+          <CardHeader className="bg-muted/30 border-b pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
                 <Database className="h-5 w-5 text-blue-500" />
               </div>
               <div>
                 <CardTitle className="text-lg">Data</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Manage your saved preferences
-                </p>
+                <p className="text-muted-foreground text-sm">Manage your saved preferences</p>
               </div>
             </div>
           </CardHeader>
@@ -94,16 +94,14 @@ function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Favorites</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {favorites.length} tool{favorites.length !== 1 ? 's' : ''} saved to favorites
                 </p>
               </div>
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() =>
-                  favorites.forEach((id) => removeFavorite(id))
-                }
+                onClick={() => favorites.forEach((id) => removeFavorite(id))}
                 disabled={favorites.length === 0}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -115,16 +113,14 @@ function SettingsPage() {
 
         {/* About */}
         <Card className="overflow-hidden">
-          <CardHeader className="border-b bg-muted/30 pb-4">
+          <CardHeader className="bg-muted/30 border-b pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
                 <Info className="h-5 w-5 text-green-500" />
               </div>
               <div>
                 <CardTitle className="text-lg">About</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Information about the platform
-                </p>
+                <p className="text-muted-foreground text-sm">Information about the platform</p>
               </div>
             </div>
           </CardHeader>
@@ -135,11 +131,11 @@ function SettingsPage() {
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="text-sm font-medium">Built with</span>
-              <span className="text-sm text-muted-foreground">React + TypeScript + Vite</span>
+              <span className="text-muted-foreground text-sm">React + TypeScript + Vite</span>
             </div>
-            <p className="text-sm text-muted-foreground pt-2 border-t">
-              A modern micro-frontend developer tools platform with a focus on 
-              performance, privacy, and user experience.
+            <p className="text-muted-foreground border-t pt-2 text-sm">
+              A modern micro-frontend developer tools platform with a focus on performance, privacy,
+              and user experience.
             </p>
           </CardContent>
         </Card>
@@ -159,11 +155,11 @@ function SettingsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <span className="text-sm">Open Search</span>
-                <kbd className="rounded bg-muted px-2 py-1 text-xs font-mono">⌘K / Ctrl+K</kbd>
+                <kbd className="bg-muted rounded px-2 py-1 font-mono text-xs">⌘K / Ctrl+K</kbd>
               </div>
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <span className="text-sm">Toggle Theme</span>
-                <kbd className="rounded bg-muted px-2 py-1 text-xs font-mono">Auto</kbd>
+                <kbd className="bg-muted rounded px-2 py-1 font-mono text-xs">Auto</kbd>
               </div>
             </div>
           </CardContent>

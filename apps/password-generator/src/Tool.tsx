@@ -20,7 +20,6 @@ import {
   Clock,
   ArrowUpDown,
   Filter,
-
 } from 'lucide-react';
 import { useEmbedded } from '@dev-tools/tool-sdk';
 
@@ -63,21 +62,63 @@ function calculateStrength(password: string): number {
   return Math.min(score, 5);
 }
 
-function getStrengthInfo(strength: number): { 
-  label: string; 
-  color: string; 
+function getStrengthInfo(strength: number): {
+  label: string;
+  color: string;
   bgColor: string;
   textColor: string;
   passwordColor: string;
   icon: React.ElementType;
 } {
   const levels = [
-    { label: 'Very Weak', color: 'bg-red-500', bgColor: 'bg-red-500/10', textColor: 'text-red-500', passwordColor: 'text-red-500', icon: ShieldAlert },
-    { label: 'Weak', color: 'bg-orange-500', bgColor: 'bg-orange-500/10', textColor: 'text-orange-500', passwordColor: 'text-orange-500', icon: ShieldAlert },
-    { label: 'Fair', color: 'bg-yellow-500', bgColor: 'bg-yellow-500/10', textColor: 'text-yellow-600', passwordColor: 'text-yellow-600', icon: Shield },
-    { label: 'Strong', color: 'bg-green-500', bgColor: 'bg-green-500/10', textColor: 'text-green-600', passwordColor: 'text-green-600', icon: ShieldCheck },
-    { label: 'Very Strong', color: 'bg-emerald-500', bgColor: 'bg-emerald-500/10', textColor: 'text-emerald-600', passwordColor: 'text-emerald-600', icon: ShieldCheck },
-    { label: 'Excellent', color: 'bg-emerald-600', bgColor: 'bg-emerald-600/10', textColor: 'text-emerald-700', passwordColor: 'text-emerald-700', icon: ShieldCheck },
+    {
+      label: 'Very Weak',
+      color: 'bg-red-500',
+      bgColor: 'bg-red-500/10',
+      textColor: 'text-red-500',
+      passwordColor: 'text-red-500',
+      icon: ShieldAlert,
+    },
+    {
+      label: 'Weak',
+      color: 'bg-orange-500',
+      bgColor: 'bg-orange-500/10',
+      textColor: 'text-orange-500',
+      passwordColor: 'text-orange-500',
+      icon: ShieldAlert,
+    },
+    {
+      label: 'Fair',
+      color: 'bg-yellow-500',
+      bgColor: 'bg-yellow-500/10',
+      textColor: 'text-yellow-600',
+      passwordColor: 'text-yellow-600',
+      icon: Shield,
+    },
+    {
+      label: 'Strong',
+      color: 'bg-green-500',
+      bgColor: 'bg-green-500/10',
+      textColor: 'text-green-600',
+      passwordColor: 'text-green-600',
+      icon: ShieldCheck,
+    },
+    {
+      label: 'Very Strong',
+      color: 'bg-emerald-500',
+      bgColor: 'bg-emerald-500/10',
+      textColor: 'text-emerald-600',
+      passwordColor: 'text-emerald-600',
+      icon: ShieldCheck,
+    },
+    {
+      label: 'Excellent',
+      color: 'bg-emerald-600',
+      bgColor: 'bg-emerald-600/10',
+      textColor: 'text-emerald-700',
+      passwordColor: 'text-emerald-700',
+      icon: ShieldCheck,
+    },
   ];
   return levels[strength] || levels[0];
 }
@@ -123,7 +164,10 @@ export default function PasswordGenerator() {
     if (options.symbols) charset += CHAR_SETS.symbols;
 
     if (options.excludeAmbiguous) {
-      charset = charset.split('').filter(c => !CHAR_SETS.ambiguous.includes(c)).join('');
+      charset = charset
+        .split('')
+        .filter((c) => !CHAR_SETS.ambiguous.includes(c))
+        .join('');
     }
 
     if (charset === '') {
@@ -141,26 +185,34 @@ export default function PasswordGenerator() {
 
     setPassword(newPassword);
     const strength = calculateStrength(newPassword);
-    setHistory(prev => [{ 
-      id: generateId(),
-      password: newPassword, 
-      timestamp: Date.now(), 
-      strength,
-    }, ...prev].slice(0, 50));
+    setHistory((prev) =>
+      [
+        {
+          id: generateId(),
+          password: newPassword,
+          timestamp: Date.now(),
+          strength,
+        },
+        ...prev,
+      ].slice(0, 50)
+    );
   }, [options]);
 
   useEffect(() => {
     generatePassword();
   }, []);
 
-  const handleCopy = useCallback(async (text: string = password) => {
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
-  }, [password]);
+  const handleCopy = useCallback(
+    async (text: string = password) => {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {}
+    },
+    [password]
+  );
 
   const clearHistory = useCallback(() => setHistory([]), []);
 
@@ -169,7 +221,7 @@ export default function PasswordGenerator() {
   const strengthPercent = (strength / 5) * 100;
 
   const toggleOption = (key: keyof PasswordOptions) => {
-    setOptions(prev => ({ ...prev, [key]: !prev[key] }));
+    setOptions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const charsetSize = useMemo(() => {
@@ -183,53 +235,61 @@ export default function PasswordGenerator() {
 
   const entropy = Math.floor(options.length * Math.log2(charsetSize || 1));
 
-  const charTypes = useMemo(() => ({
-    upper: password.replace(/[^A-Z]/g, '').length,
-    lower: password.replace(/[^a-z]/g, '').length,
-    nums: password.replace(/[^0-9]/g, '').length,
-    sym: password.replace(/[a-zA-Z0-9]/g, '').length,
-  }), [password]);
+  const charTypes = useMemo(
+    () => ({
+      upper: password.replace(/[^A-Z]/g, '').length,
+      lower: password.replace(/[^a-z]/g, '').length,
+      nums: password.replace(/[^0-9]/g, '').length,
+      sym: password.replace(/[a-zA-Z0-9]/g, '').length,
+    }),
+    [password]
+  );
 
   // Sorted and filtered history
   const sortedHistory = useMemo(() => {
     let result = [...history];
-    
+
     // Apply filter
     if (filterStrength !== null) {
-      result = result.filter(h => h.strength === filterStrength);
+      result = result.filter((h) => h.strength === filterStrength);
     }
-    
+
     // Apply sort
     result.sort((a, b) => {
       switch (sortOrder) {
-        case 'newest': return b.timestamp - a.timestamp;
-        case 'oldest': return a.timestamp - b.timestamp;
-        case 'strongest': return b.strength - a.strength;
-        case 'weakest': return a.strength - b.strength;
-        default: return 0;
+        case 'newest':
+          return b.timestamp - a.timestamp;
+        case 'oldest':
+          return a.timestamp - b.timestamp;
+        case 'strongest':
+          return b.strength - a.strength;
+        case 'weakest':
+          return a.strength - b.strength;
+        default:
+          return 0;
       }
     });
-    
+
     return result;
   }, [history, sortOrder, filterStrength]);
 
   // Stats for filter pills
   const strengthCounts = useMemo(() => {
     const counts: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    history.forEach(h => {
+    history.forEach((h) => {
       counts[h.strength] = (counts[h.strength] || 0) + 1;
     });
     return counts;
   }, [history]);
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="bg-background flex h-full flex-col">
       {/* Compact Header */}
       {!isEmbedded && (
         <motion.header
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="border-b bg-card shrink-0"
+          className="bg-card shrink-0 border-b"
         >
           <div className="mx-auto w-full px-3">
             <div className="flex h-12 items-center justify-between">
@@ -239,7 +299,9 @@ export default function PasswordGenerator() {
                 </div>
                 <div>
                   <h1 className="text-base font-bold">Password Generator</h1>
-                  <p className="hidden sm:block text-[10px] text-muted-foreground">Generate secure, random passwords</p>
+                  <p className="text-muted-foreground hidden text-[10px] sm:block">
+                    Generate secure, random passwords
+                  </p>
                 </div>
               </div>
             </div>
@@ -248,49 +310,51 @@ export default function PasswordGenerator() {
       )}
 
       {/* Main Content - Three Column Layout */}
-      <main className="flex-1 p-2 overflow-hidden">
-        <div className="mx-auto w-full max-w-7xl h-full flex flex-col gap-2">
-          
+      <main className="flex-1 overflow-hidden p-2">
+        <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-2">
           {/* Three Column Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 flex-1 min-h-0">
-            
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-3">
             {/* Column 1: Password Display with Regenerate */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col"
+              className="bg-card flex flex-col overflow-hidden rounded-xl border shadow-sm"
             >
-              <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30 shrink-0">
+              <div className="bg-muted/30 flex shrink-0 items-center justify-between border-b px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-primary" />
+                  <Zap className="text-primary h-4 w-4" />
                   <span className="text-sm font-semibold">Generated Password</span>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${strengthInfo.bgColor} ${strengthInfo.textColor}`}>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs ${strengthInfo.bgColor} ${strengthInfo.textColor}`}
+                >
                   {strengthInfo.label}
                 </span>
               </div>
-              
-              <div className="flex-1 p-4 flex flex-col justify-center gap-4">
+
+              <div className="flex flex-1 flex-col justify-center gap-4 p-4">
                 {/* Password with strength color */}
                 <motion.div
                   key={password}
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`font-mono text-2xl sm:text-3xl break-all text-center ${strengthInfo.passwordColor}`}
+                  className={`break-all text-center font-mono text-2xl sm:text-3xl ${strengthInfo.passwordColor}`}
                 >
                   {showPassword ? password : '•'.repeat(password.length)}
                 </motion.div>
-                
+
                 {/* Strength Bar */}
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                  <div className="bg-muted h-2 flex-1 overflow-hidden rounded-full">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${strengthPercent}%` }}
                       className={`h-full ${strengthInfo.color}`}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">{entropy} bits</span>
+                  <span className="text-muted-foreground whitespace-nowrap text-xs font-medium">
+                    {entropy} bits
+                  </span>
                 </div>
               </div>
 
@@ -298,14 +362,14 @@ export default function PasswordGenerator() {
               <div className="grid grid-cols-3 border-t">
                 <button
                   onClick={() => setShowPassword(!showPassword)}
-                  className="flex items-center justify-center gap-1 px-3 py-2.5 hover:bg-muted transition-colors border-r"
+                  className="hover:bg-muted flex items-center justify-center gap-1 border-r px-3 py-2.5 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   <span className="text-xs">{showPassword ? 'Hide' : 'Show'}</span>
                 </button>
                 <button
                   onClick={generatePassword}
-                  className="flex items-center justify-center gap-1 px-3 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors border-r"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-1 border-r px-3 py-2.5 transition-colors"
                 >
                   <RefreshCw className="h-4 w-4" />
                   <span className="text-xs font-medium">Regenerate</span>
@@ -327,16 +391,16 @@ export default function PasswordGenerator() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col"
+              className="bg-card flex flex-col overflow-hidden rounded-xl border shadow-sm"
             >
-              <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30 shrink-0">
+              <div className="bg-muted/30 flex shrink-0 items-center justify-between border-b px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <Gauge className="h-4 w-4 text-primary" />
+                  <Gauge className="text-primary h-4 w-4" />
                   <span className="text-sm font-semibold">Character Analysis</span>
                 </div>
               </div>
-              
-              <div className="p-3 space-y-2">
+
+              <div className="space-y-2 p-3">
                 {/* Character Bars */}
                 <div className="space-y-2">
                   {[
@@ -346,40 +410,40 @@ export default function PasswordGenerator() {
                     { label: 'Symbols', count: charTypes.sym, color: 'bg-orange-500' },
                   ].map(({ label, count, color }) => (
                     <div key={label} className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground w-16">{label}</span>
-                      <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden">
+                      <span className="text-muted-foreground w-16 text-xs">{label}</span>
+                      <div className="bg-muted h-4 flex-1 overflow-hidden rounded-full">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: password ? `${(count / password.length) * 100}%` : 0 }}
                           className={`h-full ${color}`}
                         />
                       </div>
-                      <span className="text-xs font-bold w-4 text-right">{count}</span>
+                      <span className="w-4 text-right text-xs font-bold">{count}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Mini Recent History */}
-              <div className="flex-1 border-t flex flex-col min-h-0">
-                <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
+              <div className="flex min-h-0 flex-1 flex-col border-t">
+                <div className="bg-muted/30 flex items-center justify-between px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <History className="h-3.5 w-3.5 text-primary" />
+                    <History className="text-primary h-3.5 w-3.5" />
                     <span className="text-xs font-semibold">Recent</span>
                     {history.length > 0 && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                      <span className="bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[10px]">
                         {history.length}
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => setShowHistoryPopup(true)}
-                    className="text-[10px] text-primary hover:underline"
+                    className="text-primary text-[10px] hover:underline"
                   >
                     View All
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto p-1 space-y-0.5">
+                <div className="flex-1 space-y-0.5 overflow-y-auto p-1">
                   {history.slice(0, 5).map((item) => {
                     const itemStrength = getStrengthInfo(item.strength);
                     return (
@@ -387,20 +451,20 @@ export default function PasswordGenerator() {
                         key={item.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center gap-1.5 p-1.5 rounded hover:bg-muted/50 group"
+                        className="hover:bg-muted/50 group flex items-center gap-1.5 rounded p-1.5"
                       >
                         <button
                           onClick={() => setPassword(item.password)}
-                          className={`flex-1 font-mono text-xs truncate text-left ${itemStrength.passwordColor}`}
+                          className={`flex-1 truncate text-left font-mono text-xs ${itemStrength.passwordColor}`}
                         >
                           {item.password}
                         </button>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        <span className="text-muted-foreground whitespace-nowrap text-[10px]">
                           {formatTimeAgo(item.timestamp)}
                         </span>
                         <button
                           onClick={() => handleCopy(item.password)}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-muted"
+                          className="hover:bg-muted rounded p-1 opacity-0 group-hover:opacity-100"
                         >
                           <Copy className="h-3 w-3" />
                         </button>
@@ -416,20 +480,22 @@ export default function PasswordGenerator() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col"
+              className="bg-card flex flex-col overflow-hidden rounded-xl border shadow-sm"
             >
-              <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30 shrink-0">
+              <div className="bg-muted/30 flex shrink-0 items-center justify-between border-b px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <Settings2 className="h-4 w-4 text-primary" />
+                  <Settings2 className="text-primary h-4 w-4" />
                   <span className="text-sm font-semibold">Settings</span>
                 </div>
               </div>
-              
-              <div className="p-3 space-y-3 overflow-y-auto">
+
+              <div className="space-y-3 overflow-y-auto p-3">
                 {/* Length Slider */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-muted-foreground">Password Length</span>
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-muted-foreground text-xs font-medium">
+                      Password Length
+                    </span>
                     <span className="text-sm font-bold">{options.length}</span>
                   </div>
                   <input
@@ -437,10 +503,12 @@ export default function PasswordGenerator() {
                     min="4"
                     max="64"
                     value={options.length}
-                    onChange={(e) => setOptions(prev => ({ ...prev, length: parseInt(e.target.value) }))}
-                    className="w-full h-2 rounded-full bg-muted appearance-none cursor-pointer accent-primary"
+                    onChange={(e) =>
+                      setOptions((prev) => ({ ...prev, length: parseInt(e.target.value) }))
+                    }
+                    className="bg-muted accent-primary h-2 w-full cursor-pointer appearance-none rounded-full"
                   />
-                  <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-muted-foreground mt-0.5 flex justify-between text-[10px]">
                     <span>4</span>
                     <span>32</span>
                     <span>64</span>
@@ -458,33 +526,35 @@ export default function PasswordGenerator() {
                     <button
                       key={key}
                       onClick={() => toggleOption(key as keyof PasswordOptions)}
-                      className={`flex flex-col items-center gap-0.5 p-2 rounded-lg border transition-all ${
+                      className={`flex flex-col items-center gap-0.5 rounded-lg border p-2 transition-all ${
                         options[key as keyof PasswordOptions]
                           ? 'border-primary bg-primary/5'
                           : 'border-muted bg-card hover:bg-accent'
                       }`}
                     >
-                      <span className={`text-sm font-bold ${options[key as keyof PasswordOptions] ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <span
+                        className={`text-sm font-bold ${options[key as keyof PasswordOptions] ? 'text-primary' : 'text-muted-foreground'}`}
+                      >
                         {label}
                       </span>
-                      <span className="text-[9px] text-muted-foreground">{desc}</span>
+                      <span className="text-muted-foreground text-[9px]">{desc}</span>
                     </button>
                   ))}
                 </div>
 
                 {/* Exclude Ambiguous */}
-                <label className="flex items-center gap-2 p-2 rounded-lg border hover:bg-accent cursor-pointer transition-colors">
+                <label className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-lg border p-2 transition-colors">
                   <input
                     type="checkbox"
                     checked={options.excludeAmbiguous}
                     onChange={() => toggleOption('excludeAmbiguous')}
-                    className="h-4 w-4 rounded border-primary accent-primary"
+                    className="border-primary accent-primary h-4 w-4 rounded"
                   />
                   <div className="flex-1">
                     <p className="text-xs font-medium">Exclude Ambiguous</p>
-                    <p className="text-[9px] text-muted-foreground">Skip 0, O, 1, l, I</p>
+                    <p className="text-muted-foreground text-[9px]">Skip 0, O, 1, l, I</p>
                   </div>
-                  <Dice5 className="h-4 w-4 text-muted-foreground" />
+                  <Dice5 className="text-muted-foreground h-4 w-4" />
                 </label>
               </div>
             </motion.div>
@@ -506,15 +576,15 @@ export default function PasswordGenerator() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-2xl rounded-xl border bg-card shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+              className="bg-card flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30 shrink-0">
+              <div className="bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <History className="h-4 w-4 text-primary" />
+                  <History className="text-primary h-4 w-4" />
                   <span className="font-semibold">Password History</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                  <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
                     {sortedHistory.length}
                   </span>
                 </div>
@@ -522,7 +592,7 @@ export default function PasswordGenerator() {
                   {history.length > 0 && (
                     <button
                       onClick={clearHistory}
-                      className="flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-muted transition-colors text-destructive"
+                      className="hover:bg-muted text-destructive flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors"
                     >
                       <Trash2 className="h-3 w-3" />
                       Clear
@@ -530,22 +600,22 @@ export default function PasswordGenerator() {
                   )}
                   <button
                     onClick={() => setShowHistoryPopup(false)}
-                    className="p-1.5 rounded hover:bg-muted"
+                    className="hover:bg-muted rounded p-1.5"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               </div>
-              
+
               {/* Sort & Filter Bar */}
-              <div className="flex items-center gap-3 px-4 py-2 border-b bg-muted/20 shrink-0 flex-wrap">
+              <div className="bg-muted/20 flex shrink-0 flex-wrap items-center gap-3 border-b px-4 py-2">
                 {/* Sort */}
                 <div className="flex items-center gap-1.5">
-                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ArrowUpDown className="text-muted-foreground h-3.5 w-3.5" />
                   <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-                    className="text-xs px-2 py-1 rounded border bg-card focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="bg-card focus:ring-primary rounded border px-2 py-1 text-xs focus:outline-none focus:ring-1"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -555,13 +625,13 @@ export default function PasswordGenerator() {
                 </div>
 
                 {/* Filter Pills */}
-                <div className="flex items-center gap-1.5 flex-1">
-                  <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="flex flex-1 items-center gap-1.5">
+                  <Filter className="text-muted-foreground h-3.5 w-3.5" />
                   <button
                     onClick={() => setFilterStrength(null)}
-                    className={`text-[10px] px-2 py-1 rounded-full transition-colors ${
-                      filterStrength === null 
-                        ? 'bg-primary text-primary-foreground' 
+                    className={`rounded-full px-2 py-1 text-[10px] transition-colors ${
+                      filterStrength === null
+                        ? 'bg-primary text-primary-foreground'
                         : 'bg-muted hover:bg-muted/80'
                     }`}
                   >
@@ -575,7 +645,7 @@ export default function PasswordGenerator() {
                       <button
                         key={level}
                         onClick={() => setFilterStrength(filterStrength === level ? null : level)}
-                        className={`text-[10px] px-2 py-1 rounded-full transition-colors ${
+                        className={`rounded-full px-2 py-1 text-[10px] transition-colors ${
                           filterStrength === level
                             ? info.bgColor + ' ' + info.textColor + ' ring-1 ring-current'
                             : 'bg-muted hover:bg-muted/80'
@@ -587,15 +657,15 @@ export default function PasswordGenerator() {
                   })}
                 </div>
               </div>
-              
+
               {/* History List */}
               <div className="flex-1 overflow-y-auto p-2">
                 {sortedHistory.length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <History className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                  <div className="text-muted-foreground p-8 text-center">
+                    <History className="mx-auto mb-2 h-10 w-10 opacity-30" />
                     <p className="text-sm">
-                      {filterStrength !== null 
-                        ? 'No passwords match this filter' 
+                      {filterStrength !== null
+                        ? 'No passwords match this filter'
                         : 'No passwords generated yet'}
                     </p>
                   </div>
@@ -609,37 +679,42 @@ export default function PasswordGenerator() {
                           layout
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 group"
+                          className="hover:bg-muted/50 group flex items-center gap-3 rounded-lg p-2.5"
                         >
                           <button
                             onClick={() => {
                               setPassword(item.password);
                               setShowHistoryPopup(false);
                             }}
-                            className={`flex-1 font-mono text-sm truncate text-left ${itemStrength.passwordColor}`}
+                            className={`flex-1 truncate text-left font-mono text-sm ${itemStrength.passwordColor}`}
                           >
                             {item.password}
                           </button>
                           <div className="flex items-center gap-1.5">
-                            <Clock className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground" title={formatFullTime(item.timestamp)}>
+                            <Clock className="text-muted-foreground h-3 w-3" />
+                            <span
+                              className="text-muted-foreground text-xs"
+                              title={formatFullTime(item.timestamp)}
+                            >
                               {formatTimeAgo(item.timestamp)}
                             </span>
                           </div>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${itemStrength.bgColor} ${itemStrength.textColor}`}>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] ${itemStrength.bgColor} ${itemStrength.textColor}`}
+                          >
                             {itemStrength.label}
                           </span>
-                          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                             <button
                               onClick={() => handleCopy(item.password)}
-                              className="p-1.5 rounded hover:bg-muted"
+                              className="hover:bg-muted rounded p-1.5"
                               title="Copy"
                             >
                               <Copy className="h-3.5 w-3.5" />
                             </button>
                             <button
                               onClick={() => setPassword(item.password)}
-                              className="p-1.5 rounded hover:bg-muted"
+                              className="hover:bg-muted rounded p-1.5"
                               title="Use"
                             >
                               <Check className="h-3.5 w-3.5" />

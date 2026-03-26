@@ -11,13 +11,7 @@ export interface ToolMetadata {
   category: ToolCategory;
 }
 
-export type ToolCategory =
-  | 'formatter'
-  | 'encoder'
-  | 'generator'
-  | 'tester'
-  | 'converter'
-  | 'other';
+export type ToolCategory = 'formatter' | 'encoder' | 'generator' | 'tester' | 'converter' | 'other';
 
 export interface ToolConfig {
   metadata: ToolMetadata;

@@ -6,13 +6,13 @@ describe('debounce', () => {
     vi.useFakeTimers();
     const fn = vi.fn();
     const debouncedFn = debounce(fn, 100);
-    
+
     debouncedFn();
     expect(fn).not.toHaveBeenCalled();
-    
+
     vi.advanceTimersByTime(100);
     expect(fn).toHaveBeenCalledOnce();
-    
+
     vi.useRealTimers();
   });
 
@@ -20,17 +20,17 @@ describe('debounce', () => {
     vi.useFakeTimers();
     const fn = vi.fn();
     const debouncedFn = debounce(fn, 100);
-    
+
     debouncedFn();
     vi.advanceTimersByTime(50);
     debouncedFn();
     vi.advanceTimersByTime(50);
-    
+
     expect(fn).not.toHaveBeenCalled();
-    
+
     vi.advanceTimersByTime(50);
     expect(fn).toHaveBeenCalledOnce();
-    
+
     vi.useRealTimers();
   });
 
@@ -38,12 +38,12 @@ describe('debounce', () => {
     vi.useFakeTimers();
     const fn = vi.fn();
     const debouncedFn = debounce(fn, 100);
-    
+
     debouncedFn('arg1', 'arg2');
     vi.advanceTimersByTime(100);
-    
+
     expect(fn).toHaveBeenCalledWith('arg1', 'arg2');
-    
+
     vi.useRealTimers();
   });
 });

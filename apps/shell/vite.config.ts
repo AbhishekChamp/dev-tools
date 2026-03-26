@@ -11,17 +11,21 @@ export default defineConfig({
   plugins: [
     react(),
     // Only use module federation in production build
-    ...(isProd ? [federation({
-      name: 'shell',
-      remotes: {
-        jsonFormatterApp: 'http://localhost:3001/assets/remoteEntry.js',
-        regexTesterApp: 'http://localhost:3002/assets/remoteEntry.js',
-        jwtDecoderApp: 'http://localhost:3003/assets/remoteEntry.js',
-        base64ToolApp: 'http://localhost:3004/assets/remoteEntry.js',
-        passwordGeneratorApp: 'http://localhost:3005/assets/remoteEntry.js',
-      },
-      shared: ['react', 'react-dom', 'framer-motion'],
-    })] : []),
+    ...(isProd
+      ? [
+          federation({
+            name: 'shell',
+            remotes: {
+              jsonFormatterApp: 'http://localhost:3001/assets/remoteEntry.js',
+              regexTesterApp: 'http://localhost:3002/assets/remoteEntry.js',
+              jwtDecoderApp: 'http://localhost:3003/assets/remoteEntry.js',
+              base64ToolApp: 'http://localhost:3004/assets/remoteEntry.js',
+              passwordGeneratorApp: 'http://localhost:3005/assets/remoteEntry.js',
+            },
+            shared: ['react', 'react-dom', 'framer-motion'],
+          }),
+        ]
+      : []),
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {

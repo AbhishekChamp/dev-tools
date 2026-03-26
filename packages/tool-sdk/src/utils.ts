@@ -13,9 +13,7 @@ export function createToolMetadata(
   };
 }
 
-export function validateToolMetadata(
-  metadata: unknown
-): metadata is ToolMetadata {
+export function validateToolMetadata(metadata: unknown): metadata is ToolMetadata {
   if (typeof metadata !== 'object' || metadata === null) {
     return false;
   }

@@ -33,7 +33,7 @@ function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) {
             {theme === value && (
               <motion.div
                 layoutId="theme-indicator"
-                className="absolute inset-0 rounded-md bg-secondary"
+                className="bg-secondary absolute inset-0 rounded-md"
                 initial={false}
                 transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
               />

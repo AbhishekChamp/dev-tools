@@ -10,7 +10,7 @@ describe('useRecentTools store', () => {
     it('should add a tool to recent list', () => {
       const { addRecentTool } = useRecentTools.getState();
       addRecentTool('json-formatter');
-      
+
       expect(useRecentTools.getState().recentTools).toContain('json-formatter');
     });
 
@@ -19,7 +19,7 @@ describe('useRecentTools store', () => {
       addRecentTool('regex-tester');
       addRecentTool('jwt-decoder');
       addRecentTool('regex-tester');
-      
+
       const recent = useRecentTools.getState().recentTools;
       expect(recent[0]).toBe('regex-tester');
       expect(recent).toHaveLength(2);
@@ -33,7 +33,7 @@ describe('useRecentTools store', () => {
       addRecentTool('tool-4');
       addRecentTool('tool-5');
       addRecentTool('tool-6');
-      
+
       expect(useRecentTools.getState().recentTools).toHaveLength(5);
       expect(useRecentTools.getState().recentTools[0]).toBe('tool-6');
     });
@@ -43,7 +43,7 @@ describe('useRecentTools store', () => {
       addRecentTool('json-formatter');
       addRecentTool('regex-tester');
       addRecentTool('jwt-decoder');
-      
+
       const recent = useRecentTools.getState().recentTools;
       expect(recent[0]).toBe('jwt-decoder');
       expect(recent[1]).toBe('regex-tester');
@@ -57,7 +57,7 @@ describe('useRecentTools store', () => {
       addRecentTool('json-formatter');
       addRecentTool('regex-tester');
       clearRecentTools();
-      
+
       expect(useRecentTools.getState().recentTools).toHaveLength(0);
     });
   });
@@ -66,11 +66,8 @@ describe('useRecentTools store', () => {
     it('should persist recent tools to localStorage', () => {
       const { addRecentTool } = useRecentTools.getState();
       addRecentTool('json-formatter');
-      
-      expect(localStorage.setItem).toHaveBeenCalledWith(
-        'dev-tools-recent',
-        expect.any(String)
-      );
+
+      expect(localStorage.setItem).toHaveBeenCalledWith('dev-tools-recent', expect.any(String));
     });
   });
 });
