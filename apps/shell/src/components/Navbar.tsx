@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate, useRouter } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Wrench, Command, X, Home, Heart, Settings, Sparkles, Info } from 'lucide-react';
 import { ThemeToggle } from '@dev-tools/ui';
@@ -213,19 +213,21 @@ interface NavLinkProps {
   to: string;
   icon: React.ReactNode;
   label: string;
-  isActive?: boolean;
 }
 
-function NavLink({ to, icon, label, isActive }: NavLinkProps) {
+function NavLink({ to, icon, label }: NavLinkProps) {
   return (
     <Link
       to={to}
+      activeOptions={{ exact: true }}
       className={cn(
         'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-        isActive
-          ? 'bg-primary text-primary-foreground'
-          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+        'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
       )}
+      activeProps={{
+        className:
+          'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
+      }}
     >
       {icon}
       <span>{label}</span>
@@ -235,9 +237,6 @@ function NavLink({ to, icon, label, isActive }: NavLinkProps) {
 
 // Main Navbar
 export function Navbar() {
-  const router = useRouter();
-  const currentPath = router.state.location.pathname;
-
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -266,30 +265,10 @@ export function Navbar() {
         {/* Navigation */}
         <div className="flex items-center gap-1">
           <nav className="hidden items-center gap-1 md:flex">
-            <NavLink
-              to="/"
-              icon={<Home className="h-4 w-4" />}
-              label="Home"
-              isActive={currentPath === '/'}
-            />
-            <NavLink
-              to="/favorites"
-              icon={<Heart className="h-4 w-4" />}
-              label="Favorites"
-              isActive={currentPath === '/favorites'}
-            />
-            <NavLink
-              to="/settings"
-              icon={<Settings className="h-4 w-4" />}
-              label="Settings"
-              isActive={currentPath === '/settings'}
-            />
-            <NavLink
-              to="/about"
-              icon={<Info className="h-4 w-4" />}
-              label="About"
-              isActive={currentPath === '/about'}
-            />
+            <NavLink to="/" icon={<Home className="h-4 w-4" />} label="Home" />
+            <NavLink to="/favorites" icon={<Heart className="h-4 w-4" />} label="Favorites" />
+            <NavLink to="/settings" icon={<Settings className="h-4 w-4" />} label="Settings" />
+            <NavLink to="/about" icon={<Info className="h-4 w-4" />} label="About" />
           </nav>
 
           <div className="ml-2 border-l pl-2">

@@ -60,17 +60,17 @@ function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Theme</p>
-                <p className="text-muted-foreground text-sm">
-                  Current:{' '}
-                  <Badge variant="outline" className="ml-1 capitalize">
+                <div className="text-muted-foreground flex items-center gap-1 text-sm">
+                  <span>Current:</span>
+                  <Badge variant="outline" className="capitalize">
                     {theme}
-                  </Badge>{' '}
-                  (Resolved:{' '}
+                  </Badge>
+                  <span>(Resolved:</span>
                   <Badge variant="outline" className="capitalize">
                     {resolvedTheme}
                   </Badge>
-                  )
-                </p>
+                  <span>)</span>
+                </div>
               </div>
               <ThemeToggle />
             </div>

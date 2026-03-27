@@ -44,7 +44,7 @@ function FavoritesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="to-background relative overflow-hidden rounded-3xl border bg-gradient-to-br from-red-500/10 via-red-500/5 p-8 lg:p-12"
+        className="to-background bg-linear-to-br relative overflow-hidden rounded-3xl border from-red-500/10 via-red-500/5 p-8 lg:p-12"
       >
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-500/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-red-500/5 blur-3xl" />
@@ -114,12 +114,12 @@ function FavoritesPage() {
           <div className="bg-muted rounded-full p-6">
             <Heart className="text-muted-foreground h-12 w-12" />
           </div>
-          <h3 className="mt-6 text-xl font-semibold">No favorites yet</h3>
+          <h3 className="mt-6 text-lg font-semibold">No favorites yet</h3>
           <p className="text-muted-foreground mt-2 max-w-sm">
             Add tools to your favorites by clicking the heart icon on any tool page
           </p>
           <Link to="/">
-            <Button className="mt-8 gap-2" size="lg">
+            <Button className="mt-8 cursor-pointer gap-2 rounded-2xl px-8 py-4" size="lg">
               Browse All Tools
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -136,7 +136,11 @@ function FavoritesPage() {
           className="flex justify-center"
         >
           <Link to="/">
-            <Button variant="outline" size="lg" className="gap-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className="cursor-pointer gap-2 rounded-2xl px-8 py-4"
+            >
               <Sparkles className="h-4 w-4" />
               Discover More Tools
             </Button>
