@@ -32,7 +32,7 @@
     "test:ui": "pnpm --filter @dev-tools/ui test:run",
     "test:utils": "pnpm --filter @dev-tools/utils test:run",
     "ci": "pnpm format:check && pnpm lint:all && pnpm typecheck:all && pnpm test:all",
-    "prepare": "husky"
+    "prepare": "if [ -d \".git\" ] && [ -z \"$NETLIFY\" ]; then husky; fi"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

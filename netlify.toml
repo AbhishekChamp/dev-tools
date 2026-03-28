@@ -5,7 +5,9 @@
 [build.environment]
   NODE_VERSION = "20"
   PNPM_VERSION = "9"
-  NODE_ENV = "production"
+  NETLIFY = "true"
+  # Override Netlify's default NODE_ENV=production to install devDependencies
+  NODE_ENV = "development"
 
 # SPA fallback - all routes serve index.html
 [[redirects]]

@@ -16,7 +16,7 @@ pnpm --filter @dev-tools/tool-sdk build
 
 # Build shell app (includes all tools via direct imports)
 echo "🐚 Building shell app with all tools..."
-pnpm --filter shell build
+NODE_ENV=production pnpm --filter shell build
 
 # Create dist directory
 echo "📁 Creating dist directory..."
