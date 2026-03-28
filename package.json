@@ -9,6 +9,7 @@
     "build:all": "pnpm -r build",
     "build:shell": "pnpm --filter shell build",
     "build:tools": "pnpm --filter './apps/*' --exclude shell build",
+    "build:netlify": "bash scripts/build-netlify.sh",
     "dev": "pnpm -r --parallel --stream --filter '@dev-tools/shell' --filter '@dev-tools/json-formatter' --filter '@dev-tools/regex-tester' --filter '@dev-tools/jwt-decoder' --filter '@dev-tools/base64-tool' --filter '@dev-tools/password-generator' dev",
     "dev:all": "pnpm -r --parallel --stream dev",
     "dev:shell": "pnpm --filter shell dev",
